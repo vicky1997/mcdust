@@ -1,0 +1,11 @@
+*.out
+*.h5
+*.mod
+*.gcno
+*.txt
+*.inp
+*.ipynb
+*.dat
+*.o
+1DMC
+2DMC
