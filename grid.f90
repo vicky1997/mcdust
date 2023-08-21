@@ -188,7 +188,7 @@ module grid
       allocate( g%zlo(nrad,nz), g%zup(nrad,nz), g%zce(nrad,nz), g%dz(nrad,nz) )
 
       ! making the grid in z: separately for every radial zone
-      !$OMP PARALLEL DO SCHEDULE(DYNAMIC)
+      !$OMP PARALLEL DO SCHEDULE(DYNAMIC), PRIVATE(k)
       do k = 1, nrad
          call make_grid_z(rbin, bin, k, nz)
       enddo

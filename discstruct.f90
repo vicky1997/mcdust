@@ -28,47 +28,47 @@ module discstruct
         module procedure sigmag_d1
     end interface sigmag
 
-    interface densg
-        module procedure densg_ds
-        module procedure densg_d1
-    end interface densg
+    !interface densg
+    !    module procedure densg_ds
+    !    module procedure densg_d1
+    !end interface densg
 
-    interface Pg
-        module procedure Pg_ds
-        module procedure Pg_d1
-    end interface Pg
+    !interface Pg
+    !    module procedure Pg_ds
+    !    module procedure Pg_d1
+    !end interface Pg
 
-    interface vgas
-        module procedure vgas_ds
-        module procedure vgas_d1
-    end interface vgas
+    !interface vgas
+    !    module procedure vgas_ds
+    !    module procedure vgas_d1
+    !end interface vgas
 
-    interface ddensgdz
-        module procedure ddensgdz_ds
-        module procedure ddensgdz_d1
-    end interface ddensgdz
+    !interface ddensgdz
+    !    module procedure ddensgdz_ds
+    !    module procedure ddensgdz_d1
+    !end interface ddensgdz
 
-    interface ddensgdr
-        module procedure ddensgdr_ds
-        module procedure ddensgdr_d1
-    end interface ddensgdr
+    !interface ddensgdr
+    !    module procedure ddensgdr_ds
+    !    module procedure ddensgdr_d1
+    !end interface ddensgdr
 
-    interface gasmass
-        module procedure gasmass_ds
-        module procedure gasmass_d1
-    end interface gasmass
+    !interface gasmass
+    !    module procedure gasmass_ds
+    !    module procedure gasmass_d1
+    !end interface gasmass
 
-    interface dlogPg
-        module procedure dlogPg_ds
-        module procedure dlogPg_d1
-    end interface dlogPg
+    !interface dlogPg
+    !    module procedure dlogPg_ds
+    !    module procedure dlogPg_d1
+    !end interface dlogPg
 
     !real, parameter             :: alphaMRI = 1.e-3                     ! Shakura-Sunyaev's turbulence parameter; MRI turbulence ONLY!
     real, parameter             :: q       = 0.5                        ! T propto r^-q
     real, parameter             :: p       = 1.                         ! gas surface density propto r^-p
     !real, parameter             :: T0      = 280.0                      ! temperature at 1 AU [K]
     real, parameter             :: cs0     = sqrt(kB * temperature / mH2)        ! sound speed at 1 AU
-    real, parameter             :: sigmag1AU = 800.                     ! gas surface density at 1AU [g cm^-2]
+    !real, parameter             :: sigmag1AU = 800.                     ! gas surface density at 1AU [g cm^-2]
     real, parameter             :: dM      = 1.e-9 * Msun / year        ! gas accretion rate
     contains
 
@@ -86,24 +86,37 @@ module discstruct
         implicit none
         real, dimension(:), intent(in)  :: x
         real, dimension(size(x)) :: alpha_d1
-
-        alpha_d1 = alphaMRI ! this just means constant alpha
-
+        integer :: i
+        do i=1,size(x)
+            alpha_d1(i) = alphaMRI ! this just means constant alpha
+        end do
         return
     end function
 
     ! speed of the sound in gas
-    real function cs(x)
+    real function cs_ds(x)
         implicit none
         real, intent(in)  :: x
 
-        cs = cs0 * (x/(1.*AU))**(-0.5 * q)
+        cs_ds = cs0 * (x/(1.*AU))**(-0.5 * q)
 
         return
     end function
 
+    function cs_d1(x)
+        implicit none
+        real, dimension(:), intent(in)  :: x
+        real, dimension(size(x)) :: cs_d1
+        integer :: i
+
+        do i = 1,size(x)
+            cs_d1(i) = cs0 * (x(i)/(1.*AU))**(-0.5 * q)
+        end do
+        return
+    end function
+
     ! Keplerian frequency
-    real function omegaK(x)
+    real function omegaK_ds(x)
         use constants, only: Ggrav, Msun
         implicit none
         real, intent(in)  :: x
@@ -113,15 +126,44 @@ module discstruct
         return
     end function
 
+    function omegaK_d1(x)
+        use constants, only: Ggrav, Msun
+        implicit none
+        real, dimension(:), intent(in)  :: x
+        real, dimension(size(x)) :: omegaK_d1
+        integer :: i
+
+        do i=1,size(x)
+            omegaK_d1(i) = sqrt(Ggrav * Msun / x(i)**3)
+        end do
+
+        return
+    end function
+
     ! gas surface density
-    real function sigmag(x, time)
+    real function sigmag_ds(x, time)
         use constants, only: smallv
         implicit none
         real, intent(in) :: x
         real, intent(in) :: time ! in seconds
 
-        sigmag = sigmag1AU * (x/AU)**(-1.*p)
-        sigmag = max(sigmag, smallv)
+        sigmag_ds = sigmag0 * (x/AU)**(-1.*p)
+        sigmag_ds = max(sigmag, smallv)
+        
+        return
+    end function
+
+    function sigmag_d1(x, time)
+        use constants, only: smallv
+        implicit none
+        real, dimension(:), intent(in) :: x
+        real, intent(in) :: time ! in seconds
+        real, dimension(size(x)) :: sigmag_d1
+        integer :: i
+
+        do i=1,size(x)
+            sigmag_d1(i) = sigmag0 * (x(i)/AU)**(-1.*p)
+            sigmag_d1(i) = max(sigmag_d1(i), smallv)
         
         return
     end function

@@ -28,10 +28,10 @@ module parameters
     real                                :: vfrag    ! fragmentation treshold velocity
     logical                             :: vertsett ! full verical settling? (otherwise vertical redistribution)
     logical                             :: rdrift   ! radial drift on?
-    integer                             :: nbins    ! number of bins for mass histograms
+    !integer                             :: nbins    ! number of bins for mass histograms
     integer                             :: fout    ! steps between outputs
     real                                :: alphaMRI, sigmag0, temperature, eta ! gas disk properties
-    integer                             :: erosion_mass_ratio
+    integer                             :: erosion_mass_ratio ! mass ratio between bodies to trigger erosion
     logical                             :: erosion_switch  ! switch on erosion?
     logical                             :: db_data  ! write out files for sanity checks?
     character(len=100)                  :: datadir  ! data directory to write the data into.
@@ -71,7 +71,7 @@ module parameters
         eta = 0.05
         restart = .false.
         restime = 0.0
-        nbins = 200
+        !nbins = 200
         vertsett = .true.
         rdrift = .true.
         erosion_mass_ratio = 10
