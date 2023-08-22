@@ -6,78 +6,23 @@ module discstruct
     implicit none
 
     private
-    public   :: alpha, cs, omegaK, sigmag, densg, Pg, vgas, ddensgdz, ddensgdr, gasmass, dlogPg
-
-    interface alpha
-        module procedure alpha_ds
-        module procedure alpha_d1
-    end interface alpha
-
-    interface cs
-        module procedure cs_ds
-        module procedure cs_d1
-    end interface cs
-
-    interface omegaK
-        module procedure omegaK_ds
-        module procedure omegaK_d1
-    end interface omegaK
-
-    interface sigmag
-        module procedure sigmag_ds
-        module procedure sigmag_d1
-    end interface sigmag
-
-    !interface densg
-    !    module procedure densg_ds
-    !    module procedure densg_d1
-    !end interface densg
-
-    !interface Pg
-    !    module procedure Pg_ds
-    !    module procedure Pg_d1
-    !end interface Pg
-
-    !interface vgas
-    !    module procedure vgas_ds
-    !    module procedure vgas_d1
-    !end interface vgas
-
-    !interface ddensgdz
-    !    module procedure ddensgdz_ds
-    !    module procedure ddensgdz_d1
-    !end interface ddensgdz
-
-    !interface ddensgdr
-    !    module procedure ddensgdr_ds
-    !    module procedure ddensgdr_d1
-    !end interface ddensgdr
-
-    !interface gasmass
-    !    module procedure gasmass_ds
-    !    module procedure gasmass_d1
-    !end interface gasmass
-
-    !interface dlogPg
-    !    module procedure dlogPg_ds
-    !    module procedure dlogPg_d1
-    !end interface dlogPg
+    public   :: alpha, cs, omegaK, sigmag, densg, Pg, vgas, ddensgdz, ddensgdr, gasmass, dlogPg, diffcoefgas
 
     !real, parameter             :: alphaMRI = 1.e-3                     ! Shakura-Sunyaev's turbulence parameter; MRI turbulence ONLY!
     real, parameter             :: q       = 0.5                        ! T propto r^-q
     real, parameter             :: p       = 1.                         ! gas surface density propto r^-p
     !real, parameter             :: T0      = 280.0                      ! temperature at 1 AU [K]
-    real, parameter             :: cs0     = sqrt(kB * temperature / mH2)        ! sound speed at 1 AU
+    !real, parameter             :: cs0     = sqrt(kB * temperature / mH2)        ! sound speed at 1 AU
     !real, parameter             :: sigmag1AU = 800.                     ! gas surface density at 1AU [g cm^-2]
     real, parameter             :: dM      = 1.e-9 * Msun / year        ! gas accretion rate
     contains
 
     ! Shakura-Sunyaev's turbulence parameter
-    real function alpha_ds(x)
+    real function alpha(x)
         implicit none
         real, intent(in)  :: x
 
-        alpha_ds = alphaMRI ! this just means constant alpha
+        alpha = alphaMRI ! this just means constant alpha
 
         return
     end function
@@ -94,11 +39,13 @@ module discstruct
     end function
 
     ! speed of the sound in gas
-    real function cs_ds(x)
+    real function cs(x)
         implicit none
         real, intent(in)  :: x
+        real :: cs0
 
-        cs_ds = cs0 * (x/(1.*AU))**(-0.5 * q)
+        cs0     = sqrt(kB * temperature / mH2)
+        cs = cs0 * (x/(1.*AU))**(-0.5 * q)
 
         return
     end function
@@ -108,7 +55,9 @@ module discstruct
         real, dimension(:), intent(in)  :: x
         real, dimension(size(x)) :: cs_d1
         integer :: i
+        real :: cs0
 
+        cs0     = sqrt(kB * temperature / mH2)
         do i = 1,size(x)
             cs_d1(i) = cs0 * (x(i)/(1.*AU))**(-0.5 * q)
         end do
@@ -116,7 +65,7 @@ module discstruct
     end function
 
     ! Keplerian frequency
-    real function omegaK_ds(x)
+    real function omegaK(x)
         use constants, only: Ggrav, Msun
         implicit none
         real, intent(in)  :: x
@@ -141,14 +90,14 @@ module discstruct
     end function
 
     ! gas surface density
-    real function sigmag_ds(x, time)
+    real function sigmag(x, time)
         use constants, only: smallv
         implicit none
         real, intent(in) :: x
         real, intent(in) :: time ! in seconds
 
-        sigmag_ds = sigmag0 * (x/AU)**(-1.*p)
-        sigmag_ds = max(sigmag, smallv)
+        sigmag = sigmag0 * (x/AU)**(-1.*p)
+        sigmag = max(sigmag, smallv)
         
         return
     end function
@@ -164,7 +113,7 @@ module discstruct
         do i=1,size(x)
             sigmag_d1(i) = sigmag0 * (x(i)/AU)**(-1.*p)
             sigmag_d1(i) = max(sigmag_d1(i), smallv)
-        
+        end do
         return
     end function
 
@@ -195,7 +144,7 @@ module discstruct
 
     ! radial gas velocity
     real function vgas(x, time)
-        use constants, only: pi
+        !use constants, only: pi
         implicit none
         real, intent(in)  :: x, time
 

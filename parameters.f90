@@ -7,9 +7,8 @@ module parameters
 
     private
     public :: read_parameters, Ntot, ncell, nr, nz, fout, dtime, tend, smallr, restart, restime, minrad0, maxrad0, &
-              r0, matdens, dmmax, eta, dtg, vfrag, con1, con2, nbins, vertsett, rdrift, erosion_switch, db_data, &
-              datadir, path, sigmag0, temperature, alphaMRI, erosion_mass_ratio
-    
+              r0, matdens, dmmax, eta, dtg, vfrag, con1, con2, vertsett, rdrift, erosion_switch, db_data, &
+              datadir, path, sigmag0, temperature, alphaMRI, erosion_mass_ratio, nbins
     integer                             :: Ntot     ! total number of representative particles in the simulation
     integer                             :: ncell    ! number of particles per cell
     integer                             :: nr       ! nr of radial zones
@@ -28,7 +27,7 @@ module parameters
     real                                :: vfrag    ! fragmentation treshold velocity
     logical                             :: vertsett ! full verical settling? (otherwise vertical redistribution)
     logical                             :: rdrift   ! radial drift on?
-    !integer                             :: nbins    ! number of bins for mass histograms
+    integer                             :: nbins    ! number of bins for mass histograms
     integer                             :: fout    ! steps between outputs
     real                                :: alphaMRI, sigmag0, temperature, eta ! gas disk properties
     integer                             :: erosion_mass_ratio ! mass ratio between bodies to trigger erosion
@@ -38,6 +37,8 @@ module parameters
     character(len=100)                  :: path     ! absolute path of data directory
     real, protected  :: con1  ! optimization
     real, protected  :: con2  ! optimization
+
+    contains
 
     subroutine read_parameters(ctrl_file)
     
@@ -71,7 +72,7 @@ module parameters
         eta = 0.05
         restart = .false.
         restime = 0.0
-        !nbins = 200
+        nbins = 200
         vertsett = .true.
         rdrift = .true.
         erosion_mass_ratio = 10
@@ -201,4 +202,4 @@ module parameters
         return
     end subroutine read_parameters
 
-end module
+end module parameters

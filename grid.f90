@@ -5,6 +5,7 @@
 module grid
    use types
    use parallel_sort
+   use constants
    implicit none
 
    private
@@ -61,12 +62,12 @@ module grid
       allocate ( g%rlo(nrad), g%rup(nrad), g%rce(nrad), g%dr(nrad) )
       ! sorting all the swarms by r distance
       if (nrad > 1) then
-         if(size(swrm) .ge. 2097152 ) then
-            call rad_parallel_sort(swrm, r_order)
-            swrm = swrm(r_order)
-         else 
-           call shell_sort_r(swrm)
-         endif
+         !if(size(swrm) .ge. 2097152 ) then
+         call rad_parallel_sort(swrm, r_order)
+         swrm = swrm(r_order)
+         !else 
+         !  call shell_sort_r(swrm)
+         !endif
       endif
       ! we allocate all the zones with 0 size (for stupid compilers)
       allocate(rbin(nrad))
@@ -177,7 +178,7 @@ module grid
       real, intent(in)        :: smallr  ! "evaporation radius" - inner edge of the simulation
       real, intent(out)       :: totmass ! total dust mass outside of evaporation radius
       integer                 :: nrad    ! present nr of radial zones
-      integer                 :: i, k
+      integer                 :: i, k, j, x, y
 
       ! we start with the number of radial zones read from params.par
       nrad = nr
@@ -186,21 +187,27 @@ module grid
       ! now we know how many r zones do we actually have, so we can allocate arrays
       allocate( bin(nrad,nz) )
       allocate( g%zlo(nrad,nz), g%zup(nrad,nz), g%zce(nrad,nz), g%dz(nrad,nz) )
-
       ! making the grid in z: separately for every radial zone
-      !$OMP PARALLEL DO SCHEDULE(DYNAMIC), PRIVATE(k)
+      !$OMP PARALLEL DO SCHEDULE(DYNAMIC)
       do k = 1, nrad
          call make_grid_z(rbin, bin, k, nz)
       enddo
       !$OMP END PARALLEL DO
-
       ! calculating the volumes of cells and total volume of simulation
       allocate(g%vol(nrad,nz))
       do i = 1, nrad
          g%vol(i,:) = pi * (g%rup(i)**2 - g%rlo(i)**2) * g%dz(i,:)
       enddo
       g%totvol = sum(g%vol(:,:))
-
+      !open(33,file='grid.txt', status='unknown')
+      !do x=1,nrad
+      !   do y=1,nz
+      !      write(33,*) g%rlo(x)/AU, g%rce(x)/AU, g%rup(x)/AU, g%zlo(x,y)/AU, g%zce(x,y)/AU, g%zup(x,y)/AU
+      !   enddo
+      !enddo
+      !close(3)
+      !write(*,*) 'write loop done'
+      !stop
       return
    end subroutine make_grid
 
@@ -229,6 +236,7 @@ module grid
 
       increment = size(swrm) / 2
       do while (increment > 0)
+         write(*,*) increment
          do i = increment+1, size(swrm)
             j = i
             tempswarm = swrm(j)

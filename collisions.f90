@@ -18,9 +18,8 @@ module collisions
    contains
 
    ! the routine performes collisional evolution on swarms located in the cell nr,ni with the aid of the MC algorithm
-   subroutine mc_collisions(nr, ni, bin, swrm, dtime, realtime)
+   subroutine mc_collisions(nr, ni, bin, dtime, realtime, kk)
       implicit none
-      type(swarm), dimension(:), allocatable, target            :: swrm
       type(list_of_swarms), dimension(:,:), allocatable, target :: bin
       type(swarm), dimension(:), pointer              :: swarms      ! local rps array
       integer, intent(in)                             :: nr, ni      ! indices of the cell
@@ -42,6 +41,7 @@ module collisions
       real                                            :: Reynolds, v0, Vg2, veta, tL, teta ! relative velocities stuff
       real                                            :: lmfp, gasdens ! mean free path, gas density
       integer                                         :: i, k, l
+      integer, intent(out)                            :: kk ! collisions counter
       real                                            :: dustdens
       real                                            :: Kepler_freq, cs_speed
 
@@ -92,7 +92,7 @@ module collisions
 
       !------------ MAIN COLLISIONS LOOP ----------------------------------------------------
       local_time = 0.0
-      k = 0
+      kk = 0
       do while (local_time < dtime)
          totr = sum(colri)                 ! total collision rate
          call random_number(rand)
@@ -121,22 +121,12 @@ module collisions
          call col_rates_r(nri, swarms, relvels, colrates, accelncol, g%vol(nr,ni))
          colri(:) = colri(:) + colrates(:,nri)
          colri(nri) = sum(colrates(nri,:))
-         k = k + 1
+         kk = kk + 1
       enddo
       !-------------------------------------------------------------------------------------
-      !write(*,*) '       collisions in zone',nr,ni,'done: total',k,'collisions'
+      write(*,*) '       collisions in zone',nr,ni,'done: total',kk,'collisions'
 
       deallocate (colrates, accelncol, relvels, stokesnr, vs, vr, colri)
-
-      !write(*,*) '      Updating swrm:'            ! TODO: move it somewhere
-      do k = 1, nsws
-         l = 1
-         do while (swrm(l)%idnr /= swarms(k)%idnr)
-            l = l + 1
-         enddo
-         swrm(l) = swarms(k)
-      enddo
-      !write(*,*) '       swrm updated!'
 
       nullify(swarms)
 

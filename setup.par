@@ -1,5 +1,5 @@
-number_of_particles_per_cell              128
-number_of_radial_zones                    32
+number_of_particles_per_cell              256
+number_of_radial_zones                    64
 number_of_vertical_zones                  16
 steps_between_outputs                     20
 time_between_outputs_[yrs]                10.
@@ -17,9 +17,9 @@ vertical_settling?                        .true.
 radial_drift?                             .true.
 fragmentation_velocity_[cm/s]             1000.
 alpha                                     1.e-3
-sigma_gas_[g/cm2]                         1000.
+sigma_gas_[g/cm2]                         800.
 temperature_[K]                           280.
-erosion?                                  .true.
+erosion?                                  .false.
 erosion_mass_ratio                        10.
 eta                                       0.01
 data_directory                            "data"

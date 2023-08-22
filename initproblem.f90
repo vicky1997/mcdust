@@ -41,7 +41,6 @@ module initproblem
       if (.not.allocated(swrm)) allocate( swrm(Ntot) )
 
       ! initializing the particles
-      !$OMP PARALLEL DO PRIVATE(i) SCHEDULE(STATIC)
       do i = 1, Ntot
          swrm(i)%idnr = i
          swrm(i)%mass = m0 
@@ -57,7 +56,6 @@ module initproblem
          swrm(i)%velr = 0.0
          swrm(i)%velz = 0.0
       enddo
-      !$OMP END PARALLEL DO
           
       return
    end subroutine init_swarms

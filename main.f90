@@ -17,13 +17,13 @@ program main
    use grid,         only: g, make_grid, deallocate_grid
    use initproblem,  only: init_swarms, init_random_seed, m0, mswarm, nord
    use discstruct,   only: alpha, cs, omegaK, sigmag, densg, Pg, vgas, gasmass, dlogPg
-   use parameters,   only: read_parameters, Ntot, ncell, nz, nr, dtime, fout, tend, smallr, restart, restime, minrad0, &
+   use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, restime, minrad0, &
                            maxrad0, matdens, r0, dtg, db_data
    use output,       only: write_output, read_restart
    use timestep,     only: time_step
    use types
-   use hdf5
-   use hdf5output!, only: hdf5_file_write, hdf5_file_t, hdf5_file_close
+   !use hdf5
+   !use hdf5output!, only: hdf5_file_write, hdf5_file_t, hdf5_file_close
 
    implicit none
 
@@ -31,11 +31,11 @@ program main
    type(swarm), dimension(:), allocatable, target                  :: swrm        ! list of all swarms in the simulation
    type(list_of_swarms), dimension(:,:), allocatable, target       :: bin         ! swarms binned into cells
    type(list_of_swarms), dimension(:), allocatable                 :: rbin        ! swarms binned into radial zones
-   type(hdf5_file_t)                                               :: file
+   !type(hdf5_file_t)                                               :: file
    real                       :: total
    real(kind=4), dimension(2) :: elapsed
 
-   integer             :: i, j, iter, error
+   integer             :: i, j, iter
    real                :: time = 0.0          ! physical time
    real                :: timeofnextout = 0.0 ! time of next output
    real                :: resdt = 0.1*year               ! resulting physical time step
@@ -44,7 +44,6 @@ program main
    character(len=100)  :: ctrl_file           ! parameter file
    real                :: mdust               ! mass of dust ! TODO: can be merged with totmass?
    integer, dimension(:,:), allocatable :: ncolls
-   real :: x, dx
    !real, dimension(:), allocatable  :: mgrid  ! mass grid
 
    ! random number generator initialization
@@ -58,13 +57,13 @@ program main
    write(*,*) 'Initializing representative bodies...'
    if (restart) then
       write(*,*) ' Reading restart...'
-      !call read_restart(Ntot, swrm)
-      call hdf5_file_read(Ntot, swrm)
+      call read_restart(Ntot, swrm)
+      !call hdf5_file_read(Ntot, swrm)
       write(*,*) '  restart read!'
       time = restime * year
-      !nout =  nout = nint(time/dtime)
-      timeofnextout = restime * year
-      mdust = eta * gasmass(minrad0*AU,maxrad0*AU,0.0)  ! TODO
+      nout = nint(time/dtime)
+      timeofnextout = nout * dtime
+      mdust = dtg * gasmass(minrad0*AU,maxrad0*AU,0.0)  ! TODO
       mswarm = mdust / real(Ntot)
       m0 = 4. * third * pi * r0**3 * matdens
       nord = (log10(mswarm/m0))
@@ -85,19 +84,36 @@ program main
    write(*,*) 'going into the main loop...'
 
    iter = 0
-   !call h5open_f(error)
-   call hdf5_file_write (file, swrm, 0., 'create', nout)
-   !call hdf5_file_close(file)
-   !call h5close_f(error)
-   !stop
    ! ------------------- MAIN LOOP -------------------------------------------------------------------------------------
    do while (time < tend)
 
+      ! producing output
+      if (modulo(iter,fout) == 0 .or. time>=timeofnextout) then
+         call write_output(swrm, nout)
+        ! call hdf5_file_write(file, swrm, time, 'create', nout)
+         write(*,*) 'Time: ', time/year, 'produced output: ',nout
+         open(23,file='timesout.dat',status='unknown',position='append')
+         write(23,*) 'time: ', time/year, 'produced output: ',nout
+         close(23)
+         timeofnextout = time+dtime
+         nout = nout + 1
+      endif
+
+      iter = iter + 1
+
+      ! writing max mass value for each timestep for bug fixes
+      if(db_data) then
+         open(123,file='mmax.dat',position='append')
+         write(123,*) time/year, maxval(swrm(:)%mass)
+         close(123)
+      endif
+
+
       ! determining the time step
-      if (iter == 0) then 
+      if (iter == 1) then 
          resdt = 1./omegaK(minval(swrm(:)%rdis))
-      else 
-         call time_step(swrm, resdt)
+      else
+         call time_step(bin, ncolls, timeofnextout-time, resdt)
       end if
       write(*,*) ' Performing advection: timestep',resdt/year,'yrs'
       if (db_data) then
@@ -110,12 +126,6 @@ program main
       call mc_advection(swrm, resdt, time)
       write(*,*) '  advection done'
 
-      ! writing max mass value for each timestep for bug fixes
-      if(db_data) then
-         open(123,file='mmax.dat',position='append')
-         write(123,*) time/year, maxval(swrm(:)%mass)
-         close(123)
-      endif
 
       ! removing old grid and building new one
       call deallocate_grid
@@ -125,7 +135,10 @@ program main
       call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
       write(*,*) '     grid done'
 
-      
+      deallocate(ncolls)
+      deallocate(swrm)
+      allocate(ncolls(nr,nz))
+
       ! performing collisions
       write(*,*) '   Performing collisions...'
 
@@ -134,47 +147,34 @@ program main
          do j = 1, size(g%zce,dim=2)
             if (.not.allocated(bin(i, j)%p)) cycle
             write(*,*) '    entering zone',i,j,'including ',size(bin(i, j)%p),' rbs','.....'
-            call mc_collisions(i, j, bin, swrm, resdt, time)
+            call mc_collisions(i, j, bin, resdt, time, ncolls(i,j))
          enddo
       enddo
       !$OMP END PARALLEL DO
 
       write(*,*) '    collisions done!'
 
-      ! producing output
-      if (modulo(iter,fout) == 0) then
-         !call write_output(swrm, nout)
-         nout = nout + 1
-         !call h5open_f(error)
-         call hdf5_file_write(file, swrm, time, 'create', nout)
-         !call hdf5_file_close(file)
-         !call h5close_f(error)
-         write(*,*) 'Time: ', time/year, 'produced output: ',nout
-         !open(23,file='timesout.dat',status='unknown',position='append')
-         !write(23,*) 'time: ', time/year, 'produced output: ',nout
-         !close(23)
-         !nout = nout + 1
-      endif
-
-      iter = iter + 1
-
+      ! build the new swrm list after collisions
+      allocate(swrm(0))
+      do i = 1, size(g%rce)
+        do j = 1, size(g%zce,dim=2)
+          swrm = [swrm, bin(i, j)%p(:)]
+        enddo
+      enddo
 
       time = time + resdt
 
    enddo
    ! ---- END OF THE MAIN LOOP -----------------------------------------------------------------------------------------
-   nout = nout+1
+   !nout = nout+1
    write(*,*) 'time: ', time/year, 'produced output: ',nout
    !open(23,file='timesout.dat',status='unknown',position='append')
-   !call write_output(swrm, nout)
+   call write_output(swrm, nout)
    !write(23,*) 'time: ', time/year, 'produced output: ',nout
    !close(23)
-   
-   !call h5open_f(error)
-   call hdf5_file_write(file, swrm, time, 'create', nout)
-   !call hdf5_file_close(file)
-   !call h5close_f(error)
 
+   !call hdf5_file_write(file, swrm, time, 'create', nout)
+   
    
    deallocate(bin)
    deallocate(rbin)
