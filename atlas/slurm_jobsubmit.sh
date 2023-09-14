@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=2DMCtests                   # Job name
+#SBATCH --job-name=2DMCtimestepbigloop                   # Job name
 #SBATCH --partition=intel                      # Partition to use
 #SBATCH --qos=intel_default                    # QOS to be used
 #SBATCH --mail-type=BEGIN,END,FAIL,ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)

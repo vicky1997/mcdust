@@ -1,0 +1,15 @@
+
+Program received signal SIGSEGV: Segmentation fault - invalid memory reference.
+
+Backtrace for this error:
+#0  0x2b8c70f0c607 in ???
+#1  0x2b8c70f0b86d in ???
+#2  0x2b8c71dee04f in ???
+#3  0x405e1d in ???
+#4  0x40536a in ???
+#5  0x403a0c in ???
+#6  0x2b8c71dd9764 in ???
+#7  0x403a48 in ???
+	at ../sysdeps/x86_64/start.S:118
+#8  0xffffffffffffffff in ???
+/var/spool/slurm/d/job4448479/slurm_script: line 23: 16775 Segmentation fault      (core dumped) ./2DMC setup.par

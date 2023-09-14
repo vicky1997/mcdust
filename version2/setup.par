@@ -1,7 +1,7 @@
 number_of_particles_per_cell              256
-number_of_radial_zones                    64
+number_of_radial_zones                    16
 number_of_vertical_zones                  16
-steps_between_outputs                     1000
+steps_between_outputs                     500
 time_between_outputs_[yrs]                10.
 maximum_time_of_simulation_[yrs]          1000.
 minimum_radius_[AU]                       1.

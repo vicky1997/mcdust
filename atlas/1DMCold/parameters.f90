@@ -1,0 +1,182 @@
+! this module reads parameters from params.par file
+module parameters
+
+   use constants,                only: year, AU, pi, third
+
+   implicit none
+
+   private
+   public :: read_parameters, Ntot, ncell, nr, nz, dtime, tend, smallr, restart, restime, minrad0, maxrad0, &
+             r0, matdens, dmmax, dtg, vfrag, con1, con2, khion, nbins, vertsett, rdrift, outfreq, alphaMRI, &
+             sigmag0, temperature, eta
+
+   integer                             :: Ntot     ! total number of representative particles in the simulation
+   integer                             :: ncell    ! number of particles per cell
+   integer                             :: nr       ! nr of radial zones
+   integer                             :: nz       ! nr of zones in z
+   real                                :: dtime    ! do output at least every dtime time
+   real                                :: tend     ! time to finish the simulation
+   real                                :: smallr   ! smallest distance (evaporation radius)
+   real                                :: dtg      ! dust to gas ratio
+   logical                             :: restart  ! is the simulation run from restart?
+   real                                :: restime  ! time of restart
+   real                                :: minrad0  ! minimum distance from the star of initial rim
+   real                                :: maxrad0  ! maximum distance from the star of initial rim
+   real                                :: r0       ! monomer radius
+   real, protected                     :: matdens  ! material density
+   real                                :: dmmax    ! MC-acceleration parameter
+   real                                :: vfrag    ! fragmentation treshold velocity
+   logical                             :: khion    ! is the KHI/SI on?
+   logical                             :: vertsett ! full verical settling? (otherwise vertical redistribution)
+   logical                             :: rdrift   ! radial drift on?
+   integer                             :: nbins    ! number of bins for mass histograms
+   integer                             :: outfreq  ! do output at least every outfreq iterations
+   real                                :: alphaMRI, sigmag0, temperature, eta ! gas disk properties
+
+   real, protected  :: con1  ! optimization
+   real, protected  :: con2  ! optimization
+
+   contains
+
+   subroutine read_parameters(ctrl_file)
+      implicit none
+      character(len=100), intent(in)   :: ctrl_file
+      character(len=100)               :: buffer, label
+      integer                          :: pos
+      integer                          :: ios = 0
+      integer                          :: line = 0
+      integer, parameter               :: fh = 1
+
+      ! setting default values (overwritten while reading the file!)
+      minrad0 = 3.0
+      maxrad0 = 5.0
+      r0 = 1.e-2
+      ncell = 200
+      nr   = 10
+      nz = 1
+      dtime = 100. * year
+      tend = 1000. * year
+      matdens = 1.
+      dmmax = 0.001
+      smallr = 2.0
+      dtg = 0.01
+      vfrag = 100.
+      restart = .false.
+      restime = 0.0
+      khion = .false.
+      nbins = 200
+      vertsett = .true.
+      rdrift = .true.
+      alphaMRI = 1.e-3
+      sigmag0 = 1000.
+      temperature = 200.
+      eta = 0.05
+
+      ! reading the parameter file
+      open(fh,file=ctrl_file,action='read')
+
+      ! ios is negative if an end of record condition is encountered or if
+      ! an endfile condition was detected.  It is positive if an error was
+      ! detected.  ios is zero otherwise.
+
+      do while (ios == 0)
+         read(fh, '(A)', iostat=ios) buffer
+         if (ios == 0) then
+            line = line + 1
+
+            pos = scan(buffer, ' 	')
+            label = buffer(1:pos)
+            buffer = buffer(pos+1:)
+
+            select case (label)
+            case ('minimum_radius_[AU]')
+               read(buffer, *, iostat=ios) minrad0
+               print *, 'Read minimum radius: ', minrad0
+            case ('maximum_radius_[AU]')
+               read(buffer, *, iostat=ios) maxrad0
+               print *, 'Read maximum radius: ', maxrad0
+            case ('monomer_radius_[cm]')
+               read(buffer, *, iostat=ios) r0
+               print *, 'Read monomer radius: ', r0
+            case('number_of_particles_per_cell')
+               read(buffer, *, iostat=ios) ncell
+               print *, 'Read number of particles per cell: ', ncell
+            case('number_of_radial_zones')
+               read(buffer, *, iostat=ios) nr
+               print *, 'Read number of radial zones: ', nr
+            case('number_of_vertical_zones')
+               read(buffer, *, iostat=ios) nz
+               print *, 'Read number of vertical zones: ', nz
+            case('time_between_outputs_[yrs]')
+               read(buffer, *, iostat=ios) dtime
+               print *, 'Read time between outputs: ', dtime
+               dtime = dtime * year
+            case('iterations_between_outputs')
+               read(buffer, *, iostat=ios) outfreq
+               print *, 'Read number of iterations between outputs: ', outfreq
+            case('maximum_time_of_simulation_[yrs]')
+               read(buffer, *, iostat=ios) tend
+               print *, 'Read maximum time of simulation: ', tend
+               tend = tend * year
+            case('material_density_[g/cm3]')
+               read(buffer, *, iostat=ios) matdens
+               print *, 'Read material density: ', matdens
+            case('dmmax')
+               read(buffer, *, iostat=ios) dmmax
+               print *, 'Read dmmax: ', dmmax
+            case('evaporation_radius_[AU]')
+               read(buffer, *, iostat=ios) smallr
+               print *, 'Read evaporation radius: ', smallr
+               smallr = smallr * AU
+            case('dust_to_gas_ratio')
+               read(buffer, *, iostat=ios) dtg
+               print *, 'Read dust to gas ratio: ', dtg
+            case('fragmentation_velocity_[cm/s]')
+               read(buffer, *, iostat=ios) vfrag
+               print *, 'Read fragmentation velocity: ', vfrag
+            case('restart')
+               read(buffer, *, iostat=ios) restart
+               print *, 'Restart? ',restart
+            case('Restart_time_[yrs]')
+               read(buffer, *, iostat=ios) restime
+               print *, 'Read restart time: ', restime
+            case('midplane_stirring?')
+               read(buffer, *, iostat=ios) khion
+               print *, 'midplane stirring? ', khion
+            case('vertical_settling?')
+               read(buffer, *, iostat=ios) vertsett
+               print *, 'vertical settling on? ', vertsett
+            case('radial_drift?')
+               read(buffer, *, iostat=ios) rdrift
+               print *, 'radial drift on? ', rdrift
+             case('alpha')
+                read(buffer, *, iostat=ios) alphaMRI
+                print *, 'alpha ', alphaMRI
+             case('sigma_gas_[g/cm2]')
+                read(buffer, *, iostat=ios) sigmag0
+                print *, 'gas surface density ', sigmag0
+             case('temperature_[K]')
+                read(buffer, *, iostat=ios) temperature
+                print *, 'gas temperature ', temperature
+              case('eta')
+                 read(buffer, *, iostat=ios) eta
+                 print *, 'pressure gradient parameter eta ', eta
+
+            ! if you want other parameters add another cases here and in the setup file
+
+            case default
+               print *, 'Skipping invalid label at line', line
+            end select
+         end if
+      end do
+
+      Ntot = ncell * nr * nz
+      con1 = pi**third * (0.75 / matdens)**(2. * third)
+      con2 = (0.75 / pi / matdens)**third
+
+      close(fh)
+
+      return
+   end subroutine read_parameters
+
+end module
