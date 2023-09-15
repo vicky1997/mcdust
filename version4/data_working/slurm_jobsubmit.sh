@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=2DMC_atlas_v3                   # Job name
+#SBATCH --job-name=2DMC_atlas_v4                   # Job name
 #SBATCH --partition=intel                      # Partition to use
 #SBATCH --qos=intel_default                    # QOS to be used
 #SBATCH --mail-type=BEGIN,END,FAIL,ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)

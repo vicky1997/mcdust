@@ -20,5 +20,5 @@ else
 fi
 export OMP_NUM_THREADS=$omp_threads
 
-./2DMC setup.par
+srun ./2DMC setup.par
 # End of submit file
