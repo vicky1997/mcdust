@@ -6,10 +6,10 @@ FFLAGSCOV=-O2 -fdefault-real-8 -ffree-form -fopenmp -pg --coverage
 FFLAGS=-O2 -fdefault-real-8 -ffree-form -fopenmp
 %.o: %.f90
 
-	$(H5F) $(FFLAGSTEST) -c $<
+	$(H5F) $(FFLAGS) -c $<
 
 2DMC: main.o timestep.o hdf5output.o output.o collisions.o advection.o grid.o parallel_sort.o mrgrnk.o initproblem.o discstruct.o parameters.o types.o constants.o
-	$(H5F) $(FFLAGSTEST) $(LDFLAGS) $? -o $@
+	$(H5F) $(FFLAGS) $(LDFLAGS) $? -o $@
 
 constants.o:   constants.f90
 types.o:       types.f90

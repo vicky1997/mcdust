@@ -75,10 +75,10 @@ program main
    write(*,*) 'Initial disk mass: ', gasmass(0.1*AU,maxrad0*AU,0.0)/Msun
 
    write(*,*) ' Making grid for the first time...'
-   call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
+   call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass, ncolls)
    write(*,*) '  grid done'
    
-   allocate(ncolls(nr,nz))
+   !allocate(ncolls(nr,nz))
    ncolls(:,:) = 1
    
    write(*,*) 'going into the main loop...'
@@ -132,13 +132,14 @@ program main
       call deallocate_grid
       if (allocated(bin))  deallocate(bin)
       if (allocated(rbin)) deallocate(rbin)
+      if (allocated(ncolls)) deallocate(ncolls)
       write(*,*) '    Making grid...'
-      call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
+      call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass, ncolls)
       write(*,*) '     grid done'
 
-      deallocate(ncolls)
+      !deallocate(ncolls)
       deallocate(swrm)
-      allocate(ncolls(nr,nz))
+      !allocate(ncolls(nr,nz))
 
       ! performing collisions
       write(*,*) '   Performing collisions...'
@@ -169,10 +170,10 @@ program main
    ! ---- END OF THE MAIN LOOP -----------------------------------------------------------------------------------------
    !nout = nout+1
    write(*,*) 'time: ', time/year, 'produced output: ',nout
-   !open(23,file='timesout.dat',status='unknown',position='append')
+   open(23,file='timesout.dat',status='unknown',position='append')
    !call write_output(swrm, nout)
-   !write(23,*) 'time: ', time/year, 'produced output: ',nout
-   !close(23)
+   write(23,*) 'time: ', time/year, 'produced output: ',nout
+   close(23)
 
    call hdf5_file_write(file, swrm, time, 'create', nout)
    

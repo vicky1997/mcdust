@@ -27,17 +27,6 @@ module discstruct
         return
     end function
 
-    function alpha_d1(x)
-        implicit none
-        real, dimension(:), intent(in)  :: x
-        real, dimension(size(x)) :: alpha_d1
-        integer :: i
-        do i=1,size(x)
-            alpha_d1(i) = alphaMRI ! this just means constant alpha
-        end do
-        return
-    end function
-
     ! speed of the sound in gas
     real function cs(x)
         implicit none
@@ -47,20 +36,6 @@ module discstruct
         cs0     = sqrt(kB * temperature / mH2)
         cs = cs0 * (x/(1.*AU))**(-0.5 * q)
 
-        return
-    end function
-
-    function cs_d1(x)
-        implicit none
-        real, dimension(:), intent(in)  :: x
-        real, dimension(size(x)) :: cs_d1
-        integer :: i
-        real :: cs0
-
-        cs0     = sqrt(kB * temperature / mH2)
-        do i = 1,size(x)
-            cs_d1(i) = cs0 * (x(i)/(1.*AU))**(-0.5 * q)
-        end do
         return
     end function
 
@@ -75,20 +50,6 @@ module discstruct
         return
     end function
 
-    function omegaK_d1(x)
-        use constants, only: Ggrav, Msun
-        implicit none
-        real, dimension(:), intent(in)  :: x
-        real, dimension(size(x)) :: omegaK_d1
-        integer :: i
-
-        do i=1,size(x)
-            omegaK_d1(i) = sqrt(Ggrav * Msun / x(i)**3)
-        end do
-
-        return
-    end function
-
     ! gas surface density
     real function sigmag(x, time)
         use constants, only: smallv
@@ -99,21 +60,6 @@ module discstruct
         sigmag = sigmag0 * (x/AU)**(-1.*p)
         sigmag = max(sigmag, smallv)
         
-        return
-    end function
-
-    function sigmag_d1(x, time)
-        use constants, only: smallv
-        implicit none
-        real, dimension(:), intent(in) :: x
-        real, intent(in) :: time ! in seconds
-        real, dimension(size(x)) :: sigmag_d1
-        integer :: i
-
-        do i=1,size(x)
-            sigmag_d1(i) = sigmag0 * (x(i)/AU)**(-1.*p)
-            sigmag_d1(i) = max(sigmag_d1(i), smallv)
-        end do
         return
     end function
 

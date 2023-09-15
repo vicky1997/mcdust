@@ -31,7 +31,6 @@ module advection
 
       ! loop over all the particles: calculating advection velocities
       
-      !$OMP PARALLEL DO PRIVATE(i) SCHEDULE(DYNAMIC)
       do i = 1, size(swrm)
          particle => swrm(i)
          if (rdrift) then
@@ -47,7 +46,6 @@ module advection
             call vel_rad(i, particle, velr, vr, dtime, realtime)
          endif
       enddo
-      !$OMP END PARALLEL DO
       ! apllying the shift to particles coordinates
       if (vertsett) then
          call vertical_settling(swrm, velv, dtime)

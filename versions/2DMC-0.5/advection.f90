@@ -5,9 +5,9 @@
 module advection
 
    use constants,  only: smallv, pi, AU, third, AH2, mH2
-   use discstruct, only: densg, omegaK, cs, vgas, ddensgdr, ddensgdz, alpha
+   use discstruct, only: Pg, densg, omegaK, cs, diffcoefgas, vgas, ddensgdr, ddensgdz, alpha
    use types,      only: swarm
-   use parameters, only: matdens, smallr, con2, vertsett, rdrift, eta
+   use parameters, only: matdens, smallr, con2, vertsett, rdrift
 
    implicit none
 
@@ -18,35 +18,34 @@ module advection
 
    ! routine performes radial and vertical advection due to radial drift, vertical settling and turbulent diffusion
    ! for every particle in the simulation
-   subroutine mc_advection(swrm, alphaKH, dtime, realtime)
+   subroutine mc_advection(swrm, dtime, realtime)
       implicit none
       type(swarm), dimension(:), allocatable, target :: swrm
       type(swarm), pointer                           :: particle
       real, intent(in)                               :: dtime
       real, intent(in)                               :: realtime
       real, dimension(:), allocatable                :: vs, vr, velr, velv, vn
-      real, dimension(:), allocatable, intent(in)    :: alphaKH
       integer                                        :: i
 
       allocate(vs(size(swrm)), vr(size(swrm)), velr(size(swrm)), velv(size(swrm)), vn(size(swrm)))
 
       ! loop over all the particles: calculating advection velocities
+      
       do i = 1, size(swrm)
          particle => swrm(i)
          if (rdrift) then
             call vel_vn(i, particle, vn, realtime)
-         endif
+      endif
          if (particle%rdis > smallr) particle%stnr = stokesnr(particle,realtime)
          if (vertsett) then
             call vel_vs(i, particle, vs)
-            call vel_ver(i, particle, alphaKH, vs, velv, dtime, realtime)
+            call vel_ver(i, particle, vs, velv, dtime, realtime)
          endif
          if (rdrift) then
             call vel_rd(i, particle, vr, vn, realtime)
             call vel_rad(i, particle, velr, vr, dtime, realtime)
          endif
       enddo
-
       ! apllying the shift to particles coordinates
       if (vertsett) then
          call vertical_settling(swrm, velv, dtime)
@@ -74,18 +73,18 @@ module advection
       real, dimension(:), allocatable                :: vn
       integer, intent(in)                            :: i
 
-      vn(i) = eta * omegaK(particle%rdis) * particle%rdis
+      vn(i) = 0.25 * (Pg(particle%rdis+1., particle%zdis, realtime) - Pg(particle%rdis-1.,particle%zdis, realtime)) / &
+              densg(particle%rdis,particle%zdis,realtime) / omegaK(particle%rdis)
 
       return
    end subroutine vel_vn
 
    ! the complete vertical velocity
-   subroutine vel_ver(i, particle, alphaKH, vs, velv, dtime, realtime)
+   subroutine vel_ver(i, particle, vs, velv, dtime, realtime)
       implicit none
       type(swarm)                                     :: particle
       integer, intent(in)                             :: i
       real, intent(in)                                :: dtime, realtime
-      real, dimension(:), allocatable, intent(in)     :: alphaKH   ! TODO: multi r zone implementation!
       real, dimension(:), allocatable, intent(in)     :: vs
       real, dimension(:), allocatable                 :: velv
       real                                            :: dz
@@ -94,13 +93,11 @@ module advection
       real                                            :: vD1, vD2
 
       if (particle%rdis > smallr) then
-         Ldiff = sqrt(2. * dtime * (alpha(particle%rdis) + alphaKH(1)) * cs(particle%rdis)**2. / &
-               omegaK(particle%rdis) / (1. + particle%stnr**2))
+         Ldiff = sqrt(2. * dtime * diffcoefgas(particle%rdis)  / (1. + particle%stnr**2))
          call random_number(rand)
          dz = Ldiff/(sqrt(2.*log(2.))) * sqrt(-2.*log(rand(1))) * cos(2.*pi*rand(2))
          vD1 = dz / dtime
-         vD2 = ((alpha(particle%rdis) + alphaKH(1)) * cs(particle%rdis)**2. / omegaK(particle%rdis) &
-               / (1. + particle%stnr**2) / densg(particle%rdis,particle%zdis, realtime)) * &
+         vD2 = (diffcoefgas(particle%rdis) / (1. + particle%stnr**2) / densg(particle%rdis,particle%zdis, realtime)) * &
             ddensgdz(particle%rdis,particle%zdis, realtime)
          velv(i) = - vs(i) + vD1 + vD2
       else
@@ -124,13 +121,11 @@ module advection
       real                                            :: vD1, vD2
 
       if (particle%rdis > smallr) then
-         Ldiff = sqrt(2. * dtime * alpha(particle%rdis) * cs(particle%rdis)**2. &
-                 / omegaK(particle%rdis) / (1. + particle%stnr**2))
+         Ldiff = sqrt(2. * dtime * diffcoefgas(particle%rdis) / (1. + particle%stnr**2))
          call random_number(rand)
          dr = Ldiff/(sqrt(2.*log(2.))) * sqrt(-2.*log(rand(1))) * cos(2.*pi*rand(2))
          vD1 = dr / dtime
-         vD2 = (alpha(particle%rdis) * cs(particle%rdis)**2. / omegaK(particle%rdis) &
-            / (1. + particle%stnr**2) / densg(particle%rdis,particle%zdis, realtime)) * &
+         vD2 = (diffcoefgas(particle%rdis) / (1. + particle%stnr**2) / densg(particle%rdis,particle%zdis, realtime)) * &
             (ddensgdr(particle%rdis,particle%zdis, realtime))
          velr(i) = vr(i) + vD1 + vD2
       else
@@ -165,7 +160,7 @@ module advection
       return
    end subroutine vertical_settling
 
-   ! vertical redistribution of particles to a theoretical Gausian profile
+    ! vertical redistribution of particles to a theoretical Gausian profile
    subroutine vertical_redistr(swrm, realtime)
       implicit none
       type(swarm), dimension(:), allocatable, target  :: swrm

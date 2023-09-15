@@ -4,7 +4,8 @@
 ! see Drazkowska et al 2013, Sect 2.4, Fig 1
 module grid
    use types
-
+   use parallel_sort
+   use constants
    implicit none
 
    private
@@ -16,7 +17,7 @@ module grid
 
    ! find location of the walls in radial dimension
    subroutine make_grid_r(swrm, rbin, nrad, smallr,totmass)
-      use constants,  only: smallv, AU
+      use constants,  only: smallv
       use initproblem, only: mswarm
       implicit none
       type(swarm), dimension(:), allocatable :: swrm
@@ -28,6 +29,8 @@ module grid
       real, intent(in)        :: smallr  ! "evaporation radius"
       real, intent(out)       :: totmass ! total dust mass ouside of the "evaporation radius"
       integer                 :: i, k, nin
+      integer, dimension(size(swrm)) :: r_order ! rank for sorting wrt radius
+      
 
       nrad0 = nrad
 
@@ -40,7 +43,7 @@ module grid
          stop
       endif
 
-      ! counting particles outside smallr: TODO: need to put them in another array to recreate swrm correctly
+      ! counting particles outside smallr:
       k = count(swrm(:)%rdis > smallr)
       totmass = k * mswarm  ! mass of dust outside smallr
 
@@ -57,10 +60,15 @@ module grid
       nzone = nint(real(k)/real(nrad))
 
       allocate ( g%rlo(nrad), g%rup(nrad), g%rce(nrad), g%dr(nrad) )
-
       ! sorting all the swarms by r distance
-      if (nrad > 1) call shell_sort_r(swrm)
-
+      if (nrad > 1) then
+         if(size(swrm) .ge. 2097152 ) then
+         call rad_parallel_sort(swrm, r_order)
+         swrm = swrm(r_order)
+         else 
+           call sort_swrm_r(swrm)
+         endif
+      endif
       ! we allocate all the zones with 0 size (for stupid compilers)
       allocate(rbin(nrad))
       do i = 1, nrad
@@ -70,16 +78,16 @@ module grid
       ! etablishing walls of r zones & putting particles there
       g%rlo(1) = minr
       if (nrad > 1) then
-         g%rup(1) = 0.5 * (swrm(nin + nzone)%rdis + swrm(nin + nzone + 1)%rdis)
-         g%rce(1) = 0.5 * (g%rlo(1) + g%rup(1))
+         g%rup(1) = 0.5*(swrm(nin + nzone)%rdis + swrm(nin + nzone + 1)%rdis)
+         g%rce(1) = sqrt(g%rlo(1) * g%rup(1))
          do k = nin + 1, nin + nzone
             rbin(1)%p = [rbin(1)%p, swrm(k)] ! lhs realloc
          enddo
       endif
       do i = 2, nrad - 1
          g%rlo(i) = g%rup(i - 1)
-         g%rup(i) = 0.5 * (swrm(nin + i * nzone)%rdis + swrm(nin + i * nzone + 1)%rdis)
-         g%rce(i) = 0.5 * (g%rlo(i) + g%rup(i))
+         g%rup(i) = sqrt(swrm(nin + i * nzone)%rdis * swrm(nin + i * nzone + 1)%rdis)
+         g%rce(i) = sqrt(g%rlo(i) * g%rup(i))
          do k = nin + (i-1) * nzone + 1, nin + i * nzone
             rbin(i)%p = [rbin(i)%p, swrm(k)] ! lhs realloc
          enddo
@@ -88,7 +96,7 @@ module grid
          g%rlo(nrad) = g%rup(nrad - 1)
       endif
       g%rup(nrad) = maxr
-      g%rce(nrad) = 0.5 * (g%rlo(nrad) + g%rup(nrad))
+      g%rce(nrad) = sqrt(g%rlo(nrad) * g%rup(nrad))
       do k = nin + (nrad-1) * nzone + 1, size(swrm)
          rbin(nrad)%p = [rbin(nrad)%p, swrm(k)] ! lhs realloc
       enddo
@@ -110,13 +118,14 @@ module grid
       real                    :: minz   ! min z of swarms
       real                    :: maxz   ! max z of swarms
       integer                 :: i, j
-
+      !integer, dimension(:), allocatable :: z_order ! rank for sorting wrt z
+      
       ! adjusting the bottom and the top wall
       minz = minval(rbin(k)%p(:)%zdis)-smallv
       maxz = maxval(rbin(k)%p(:)%zdis)+smallv
 
       ! sorting the particles by z
-      if (nz > 1) call shell_sort_z(rbin(k)%p)
+      if (nz > 1) call sort_swrm_z(rbin(k)%p)
 
       ! stupid compilers workaround
       do i = 1, nz
@@ -158,18 +167,19 @@ module grid
    end subroutine make_grid_z
 
    ! makes 2D grid using cylindrical coordinates: r and z
-   subroutine make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
-      use constants,  only: pi, third, AU
+   subroutine make_grid(swrm, bin, rbin, nr, nz, smallr,totmass,ncolls)
+      use constants,  only: pi
       implicit none
       type(swarm), dimension(:), allocatable :: swrm
       type(list_of_swarms), dimension(:,:), allocatable, target       :: bin
       type(list_of_swarms), dimension(:),   allocatable               :: rbin
+      integer, dimension(:,:), allocatable                            :: ncolls
       integer                 :: nz      ! nr of zones in z
       integer                 :: nr      ! nominal nr of radial zones
       real, intent(in)        :: smallr  ! "evaporation radius" - inner edge of the simulation
       real, intent(out)       :: totmass ! total dust mass outside of evaporation radius
       integer                 :: nrad    ! present nr of radial zones
-      integer                 :: i, k
+      integer                 :: i, k, j, x, y
 
       ! we start with the number of radial zones read from params.par
       nrad = nr
@@ -177,22 +187,29 @@ module grid
       call make_grid_r(swrm, rbin, nrad, smallr,totmass)
       ! now we know how many r zones do we actually have, so we can allocate arrays
       allocate( bin(nrad,nz) )
+      allocate( ncolls(nrad,nz) )
       allocate( g%zlo(nrad,nz), g%zup(nrad,nz), g%zce(nrad,nz), g%dz(nrad,nz) )
-
       ! making the grid in z: separately for every radial zone
-      !$OMP PARALLEL DO SCHEDULE(DYNAMIC), PRIVATE(k)
+      !$OMP PARALLEL DO SCHEDULE(DYNAMIC)
       do k = 1, nrad
          call make_grid_z(rbin, bin, k, nz)
       enddo
       !$OMP END PARALLEL DO
-
       ! calculating the volumes of cells and total volume of simulation
       allocate(g%vol(nrad,nz))
       do i = 1, nrad
          g%vol(i,:) = pi * (g%rup(i)**2 - g%rlo(i)**2) * g%dz(i,:)
       enddo
       g%totvol = sum(g%vol(:,:))
-
+      !open(33,file='grid.txt', status='unknown')
+      !do x=1,nrad
+      !   do y=1,nz
+      !      write(33,*) g%rlo(x)/AU, g%rce(x)/AU, g%rup(x)/AU, g%zlo(x,y)/AU, g%zce(x,y)/AU, g%zup(x,y)/AU
+      !   enddo
+      !enddo
+      !close(3)
+      !write(*,*) 'write loop done'
+      !stop
       return
    end subroutine make_grid
 
@@ -240,6 +257,35 @@ module grid
       return
    end subroutine shell_sort_r
 
+
+   subroutine sort_swrm_r(lista)
+      implicit none
+      type(swarm), dimension(:), allocatable :: lista
+      real                                   :: temp
+      type(swarm)                            :: tempswarm
+      integer                                :: i, j
+
+      ! in this sort method the first element has to be already the smallest
+      !i = int(sum(minloc(lista(:)%zdis)))
+      i = int(sum(minloc(lista(:)%rdis)))
+      tempswarm = lista(i)
+      lista(i) = lista(1)
+      lista(1) = tempswarm
+
+      do i = 2, size(lista)
+         j = i - 1
+         temp = lista(i)%rdis
+         tempswarm = lista(i)
+         do while (j>=1 .and. lista(j)%rdis>temp)
+            lista(j+1) = lista(j)
+            j = j - 1
+         end do
+         lista(j+1) = tempswarm
+      enddo
+
+      return
+   end subroutine sort_swrm_r
+
    ! sorting swrm table by z using insertion sort algorithm
    subroutine sort_swrm_z(lista)
       implicit none
@@ -267,34 +313,5 @@ module grid
 
       return
    end subroutine sort_swrm_z
-
-   ! sorting particles by vertical distance using shell sort algorithm
-   subroutine shell_sort_z(lista)
-      implicit none
-      type(swarm), dimension(:), allocatable :: lista
-      integer                                :: i, j, increment
-      type(swarm)                            :: tempswarm
-
-      increment = size(lista) / 2
-      do while (increment > 0)
-         do i = increment+1, size(lista)
-            j = i
-            tempswarm = lista(j)
-            do while (j >= increment+1 .and. lista(j-increment)%zdis > tempswarm%zdis)
-               lista(j) = lista(j-increment)
-               j = j - increment
-            enddo
-            lista(j) = tempswarm
-         enddo
-         if (increment == 2) then
-            increment = 1
-         else
-            increment = increment * 5 / 11
-         endif
-      enddo
-
-      return
-   end subroutine shell_sort_z
-
 
 end

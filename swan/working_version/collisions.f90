@@ -259,7 +259,7 @@ module collisions
       colrates(nl,:) = swarms(:)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
       ! instead of perform 1000 identical collisions, we divide the collision rate by 1000 but if the collision happens,
       ! we stick 1000 small particles at once
-      colrates(nl,:) = colrates(nl,:) / accelncol(nl,:)
+      where(accelncol(nl,:) > 0.0) colrates(nl,:) = colrates(nl,:) / accelncol(nl,:)
       ! if the representative particle represents less than 1 particle, the method is not valid anymore,
       ! so the collision rate is supressed
       where(swarms(:)%npar <= 1.0) colrates(nl,:) = 0.0
@@ -279,7 +279,7 @@ module collisions
       real, intent(in)                                :: vol      ! volume of the cell
 
       colrates(:,nl) = swarms(nl)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
-      colrates(:,nl) = colrates(:,nl) / accelncol(:,nl)
+      where(accelncol(:,nl) > 0.0) colrates(:,nl) = colrates(:,nl) / accelncol(:,nl)
       where(swarms(:)%npar <= 1.0) colrates(:,nl) = 0.0
 
       return
@@ -296,7 +296,7 @@ module collisions
 
       accelncol_c => accelncol(nri,:)
 
-      accelncol_c(:) = 1.0
+      accelncol_c(:) = 0.0
       where ((swarms(:)%mass / swarms(nri)%mass) < dmmax)
          accelncol_c(:) = swarms(nri)%mass * dmmax / swarms(:)%mass
       endwhere
@@ -313,7 +313,7 @@ module collisions
 
       accelncol_r => accelncol(:,nri)
 
-      accelncol_r(:) = 1.0
+      accelncol_r(:) = 0.0
       where ((swarms(nri)%mass / swarms(:)%mass) < dmmax)
          accelncol_r(:) = swarms(:)%mass * dmmax / swarms(nri)%mass
       endwhere
@@ -376,8 +376,8 @@ module collisions
       !else
       !  call fragmentation(nri,swarms)
       !endif
-      else if (swarms(nri)%mass/swarms(nrk)%mass .ge. 10 .and. erosion_switch) then
-         call erosion(nri,nrk,swarms,accelncol)
+      !else if (swarms(nri)%mass/swarms(nrk)%mass .ge. 10 .and. erosion_switch) then
+      !   call erosion(nri,nrk,swarms,accelncol)
       else
          call fragmentation(nri, swarms)
       endif
@@ -392,8 +392,12 @@ module collisions
       integer, intent(in)                             :: nri, nrk
       type(swarm), dimension(:), pointer              :: swarms
       real, dimension(:,:), allocatable               :: accelncol
-
-      swarms(nri)%mass = swarms(nri)%mass + accelncol(nri, nrk) * swarms(nrk)%mass
+      
+      if (accelncol(nri, nrk) > 0.0) then
+         swarms(nri)%mass = swarms(nri)%mass + accelncol(nri, nrk) * swarms(nrk)%mass
+      else
+         swarms(nri)%mass = swarms(nri)%mass + swarms(nrk)%mass
+      endif
 
       return
    end subroutine hit_and_stick
@@ -430,7 +434,11 @@ module collisions
       p = swarms(nrk)%mass/swarms(nri)%mass
       call random_number(ran)
       if (ran .ge. p) then
-            swarms(nri)%mass = swarms(nri)%mass - accelncol(nri, nrk) * swarms(nrk)%mass
+            if(accelncol(nri,nrk) > 0.0) then
+               swarms(nri)%mass = swarms(nri)%mass - accelncol(nri, nrk) * swarms(nrk)%mass
+            else
+               swarms(nri)%mass = swarms(nri)%mass - swarms(nrk)%mass
+            endif
       else
          swarms(nri)%mass = swarms(nrk)%mass
       endif

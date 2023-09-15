@@ -4,10 +4,12 @@
 ! as well as collisions performed with Monte Carlo algorithm (collisions module)
 ! To perform collisions the RPs are binned using an adaptive grid (grid module)
 !
+! citation: Drążkowska, Windmark & Dullemond (2013) A&A 556, A37
+!
 ! Author: Joanna Drążkowska, Heidelberg University, ZAH, ITA
 ! Albert-Ueberle-Str. 2, 69120 Heidelberg, Germany
-! mailto: Drazkowska@uni-heidelberg.de
-
+! mailto: asiadrazkowska@gmail.com
+!
 program main
    use constants
    use advection,    only: mc_advection
@@ -15,21 +17,21 @@ program main
    use grid,         only: g, make_grid, deallocate_grid
    use initproblem,  only: init_swarms, init_random_seed, m0, mswarm, nord
    use discstruct,   only: alpha, cs, omegaK, sigmag, densg, Pg, vgas, gasmass, dlogPg
-   use parameters,   only: read_parameters, Ntot, ncell, nz, nr, dtime, tend, smallr, restart, restime, minrad0, &
-                           maxrad0, matdens, r0, dtg, khion, nbins, outfreq
-   use output,       only: make_histogram, write_output, read_restart, make_mass_grid
+   use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, restime, minrad0, &
+                           maxrad0, matdens, r0, dtg, db_data
+   use output,       only: write_output, read_restart
    use timestep,     only: time_step
    use types
-   use khi,          only: alpha_KH
+   use hdf5
+   use hdf5output, only: hdf5_file_write, hdf5_file_t
+
    implicit none
 
    ! the array of the representative particles (swarms) is declared here:
    type(swarm), dimension(:), allocatable, target                  :: swrm        ! list of all swarms in the simulation
    type(list_of_swarms), dimension(:,:), allocatable, target       :: bin         ! swarms binned into cells
    type(list_of_swarms), dimension(:), allocatable                 :: rbin        ! swarms binned into radial zones
-   real, dimension(:), allocatable                                 :: alphaKH     ! turbulence triggered by shear instabilities
-                                                                                  ! switched off in default version
-
+   type(hdf5_file_t)                                               :: file
    real                       :: total
    real(kind=4), dimension(2) :: elapsed
 
@@ -41,11 +43,8 @@ program main
    real                :: totmass             ! total mass of dust beyond evaporation line
    character(len=100)  :: ctrl_file           ! parameter file
    real                :: mdust               ! mass of dust ! TODO: can be merged with totmass?
-   real, dimension(:), allocatable  :: mgrid  ! mass grid
-   real, dimension(:), allocatable  :: dusttogas
    integer, dimension(:,:), allocatable :: ncolls
-   real :: x, dx
-  real :: etamax
+   !real, dimension(:), allocatable  :: mgrid  ! mass grid
 
    ! random number generator initialization
    call init_random_seed
@@ -59,40 +58,39 @@ program main
    if (restart) then
       write(*,*) ' Reading restart...'
       call read_restart(Ntot, swrm)
+      !call hdf5_file_read(Ntot, swrm)
       write(*,*) '  restart read!'
       time = restime * year
       nout = nint(time/dtime)
       timeofnextout = nout * dtime
-      mswarm = swrm(1)%npar*swrm(1)%mass
+      mdust = dtg * gasmass(minrad0*AU,maxrad0*AU,0.0)  ! TODO
+      mswarm = mdust / real(Ntot)
       m0 = 4. * third * pi * r0**3 * matdens
       nord = (log10(mswarm/m0))
    else
       call init_swarms(Ntot,swrm)
    endif
-   write(*,*) 'succees'
+   write(*,*) 'succeed'
+
+   write(*,*) 'Initial disk mass: ', gasmass(0.1*AU,maxrad0*AU,0.0)/Msun
+
+   write(*,*) ' Making grid for the first time...'
+   call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass, ncolls)
+   write(*,*) '  grid done'
+   
+   !allocate(ncolls(nr,nz))
+   ncolls(:,:) = 1
+   
    write(*,*) 'going into the main loop...'
 
-   ! making mass grid for later outputs
-   allocate (mgrid(nbins))
-   call make_mass_grid(mgrid)
-
-    write(*,*) ' Making grid for the first time...'
-    call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
-    write(*,*) '  grid done'
-
-    allocate(ncolls(nr,nz))
-    ncolls(:,:) = 1
-
-   allocate(alphaKH(nr))
-   alphaKH = 0.0
    iter = 0
-
    ! ------------------- MAIN LOOP -------------------------------------------------------------------------------------
    do while (time < tend)
 
       ! producing output
-      if (mod(iter,outfreq)==0 .or. time>=timeofnextout) then
-         call write_output(swrm, nout)
+      if (modulo(iter,fout) == 0 .or. time>=timeofnextout) then
+         !call write_output(swrm, nout)
+         call hdf5_file_write(file, swrm, time, 'create', nout)
          write(*,*) 'Time: ', time/year, 'produced output: ',nout
          open(23,file='timesout.dat',status='unknown',position='append')
          write(23,*) 'time: ', time/year, 'produced output: ',nout
@@ -103,56 +101,58 @@ program main
 
       iter = iter + 1
 
-      open(123,file='mmax.dat',position='append')
+      ! writing max mass value for each timestep for bug fixes
+      if(db_data) then
+         open(123,file='mmax.dat',position='append')
          write(123,*) time/year, maxval(swrm(:)%mass)
-      close(123)
+         close(123)
+      endif
+
 
       ! determining the time step
-      call time_step(bin, ncolls, timeofnextout-time, resdt)
-      if (iter == 1) resdt = 1./omegaK(minval(swrm(:)%rdis))
+      if (iter == 1) then 
+         resdt = 1./omegaK(minval(swrm(:)%rdis))
+      else
+         call time_step(bin, ncolls, timeofnextout-time, resdt)
+      
+      end if
       write(*,*) ' Performing advection: timestep',resdt/year,'yrs'
-      open(23,file='timestep.dat',status='unknown',position='append')
-      write(23,*) time/year,resdt/year
-      close(23)
+      if (db_data) then
+         open(23,file='timestep.dat',status='unknown',position='append')
+         write(23,*) time/year,resdt/year
+         close(23)
+      endif
 
       ! performing advection
-      call mc_advection(swrm, alphaKH, resdt, 0.0)
+      call mc_advection(swrm, resdt, time)
       write(*,*) '  advection done'
-      alphaKH = 0.0
+
 
       ! removing old grid and building new one
       call deallocate_grid
       if (allocated(bin))  deallocate(bin)
       if (allocated(rbin)) deallocate(rbin)
+      if (allocated(ncolls)) deallocate(ncolls)
       write(*,*) '    Making grid...'
-      call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
+      call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass, ncolls)
       write(*,*) '     grid done'
 
-      deallocate(ncolls)
+      !deallocate(ncolls)
       deallocate(swrm)
-      allocate(ncolls(nr,nz))
+      !allocate(ncolls(nr,nz))
 
       ! performing collisions
       write(*,*) '   Performing collisions...'
 
+      !$OMP PARALLEL DO PRIVATE(i,j) SCHEDULE(DYNAMIC)
       do i = 1, size(g%rce)
-         allocate(dusttogas(size(bin(:,:),dim=2)))
-         do j = 1, size(dusttogas)
-            dusttogas(j) = size(bin(i,j)%p) * mswarm / g%vol(i,j) / densg(g%rce(i),g%zce(i,j),time)
+         do j = 1, size(g%zce,dim=2)
+            if (.not.allocated(bin(i, j)%p)) cycle
+            write(*,*) '    entering zone',i,j,'including ',size(bin(i, j)%p),' rbs','.....'
+            call mc_collisions(i, j, bin, resdt, time, ncolls(i,j))
          enddo
-         etamax = maxval(dusttogas(:))
-         deallocate(dusttogas)
-
-         alphaKH = 0.0
-         if (khion.and.(etamax > 1)) call alpha_KH(i, rbin, alphaKH, 0.0)
-         !$OMP PARALLEL DO SCHEDULE(DYNAMIC)
-            do j = 1, size(g%zce,dim=2)
-               if (.not.allocated(bin(i, j)%p)) cycle
-               write(*,*) '    entering zone',i,j,'including ',size(bin(i, j)%p),' rbs','.....'
-               call mc_collisions(i, j, bin, resdt, 0.0, ncolls(i,j))
-            enddo
-         !$OMP END PARALLEL DO
       enddo
+      !$OMP END PARALLEL DO
 
       write(*,*) '    collisions done!'
 
@@ -168,14 +168,18 @@ program main
 
    enddo
    ! ---- END OF THE MAIN LOOP -----------------------------------------------------------------------------------------
-
+   !nout = nout+1
    write(*,*) 'time: ', time/year, 'produced output: ',nout
    open(23,file='timesout.dat',status='unknown',position='append')
-   call write_output(swrm, nout)
+   !call write_output(swrm, nout)
    write(23,*) 'time: ', time/year, 'produced output: ',nout
    close(23)
 
-   deallocate(alphaKH,mgrid,rbin,bin)
+   call hdf5_file_write(file, swrm, time, 'create', nout)
+   
+   
+   deallocate(bin)
+   deallocate(rbin)
 
    write(*,*) '------------------------------------------------------------------'
    write(*,*) 'tend exceeded, finishing simulation...'

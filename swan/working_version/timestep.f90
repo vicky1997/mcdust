@@ -27,6 +27,13 @@ module timestep
 
       old_dt = final_dtime
       final_dtime = dtout
+      
+      
+      !final_dtime = min(final_dtime, size(bin(1,1)%p) * old_dt / real(maxval(ncolls(:,:)))) !we don't want more collisions than ~ nr of particles in a zone per timestep
+      !if (vertsett) final_dtime = min(final_dtime, g%dz(1,1)/maxval(abs(bin(:,:)%p(:)%velz))) ! don't let particles jump over cells in z
+      !if (rdrift) final_dtime = min(final_dtime, g%dr(1)/maxval(abs(bin(:,:)%p(:)%velr))) ! don't let particles jump over cells in r
+      
+
       do i = 1, size(ncolls(:,:),dim=1)
         do j = 1, size(ncolls(:,:),dim=2)
           final_dtime = min(final_dtime, size(bin(i,j)%p) * old_dt / real(max(1,ncolls(i,j)))) !we don't want more collisions than ~ nr of particles in a zone per timestep
@@ -35,6 +42,7 @@ module timestep
         enddo
       enddo
 
+      
       return
    end subroutine time_step
 

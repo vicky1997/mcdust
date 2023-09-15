@@ -22,9 +22,8 @@ program main
    use output,       only: write_output, read_restart
    use timestep,     only: time_step
    use types
-   use omp_lib
-   !use hdf5
-   !use hdf5output!, only: hdf5_file_write, hdf5_file_t, hdf5_file_close
+   use hdf5
+   use hdf5output, only: hdf5_file_write, hdf5_file_t
 
    implicit none
 
@@ -32,8 +31,8 @@ program main
    type(swarm), dimension(:), allocatable, target                  :: swrm        ! list of all swarms in the simulation
    type(list_of_swarms), dimension(:,:), allocatable, target       :: bin         ! swarms binned into cells
    type(list_of_swarms), dimension(:), allocatable                 :: rbin        ! swarms binned into radial zones
-   !type(hdf5_file_t)                                               :: file
-   real                       :: total, start, end
+   type(hdf5_file_t)                                               :: file
+   real                       :: total
    real(kind=4), dimension(2) :: elapsed
 
    integer             :: i, j, iter
@@ -47,8 +46,6 @@ program main
    integer, dimension(:,:), allocatable :: ncolls
    !real, dimension(:), allocatable  :: mgrid  ! mass grid
 
-
-   start = omp_get_wtime()
    ! random number generator initialization
    call init_random_seed
 
@@ -78,10 +75,10 @@ program main
    write(*,*) 'Initial disk mass: ', gasmass(0.1*AU,maxrad0*AU,0.0)/Msun
 
    write(*,*) ' Making grid for the first time...'
-   call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
+   call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass, ncolls)
    write(*,*) '  grid done'
    
-   allocate(ncolls(nr,nz))
+   !allocate(ncolls(nr,nz))
    ncolls(:,:) = 1
    
    write(*,*) 'going into the main loop...'
@@ -92,8 +89,8 @@ program main
 
       ! producing output
       if (modulo(iter,fout) == 0 .or. time>=timeofnextout) then
-         call write_output(swrm, nout)
-         !call hdf5_file_write(file, swrm, time, 'create', nout)
+         !call write_output(swrm, nout)
+         call hdf5_file_write(file, swrm, time, 'create', nout)
          write(*,*) 'Time: ', time/year, 'produced output: ',nout
          open(23,file='timesout.dat',status='unknown',position='append')
          write(23,*) 'time: ', time/year, 'produced output: ',nout
@@ -135,13 +132,14 @@ program main
       call deallocate_grid
       if (allocated(bin))  deallocate(bin)
       if (allocated(rbin)) deallocate(rbin)
+      if (allocated(ncolls)) deallocate(ncolls)
       write(*,*) '    Making grid...'
-      call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
+      call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass, ncolls)
       write(*,*) '     grid done'
 
-      deallocate(ncolls)
+      !deallocate(ncolls)
       deallocate(swrm)
-      allocate(ncolls(nr,nz))
+      !allocate(ncolls(nr,nz))
 
       ! performing collisions
       write(*,*) '   Performing collisions...'
@@ -172,12 +170,12 @@ program main
    ! ---- END OF THE MAIN LOOP -----------------------------------------------------------------------------------------
    !nout = nout+1
    write(*,*) 'time: ', time/year, 'produced output: ',nout
-   !open(23,file='timesout.dat',status='unknown',position='append')
-   call write_output(swrm, nout)
-   !write(23,*) 'time: ', time/year, 'produced output: ',nout
-   !close(23)
+   open(23,file='timesout.dat',status='unknown',position='append')
+   !call write_output(swrm, nout)
+   write(23,*) 'time: ', time/year, 'produced output: ',nout
+   close(23)
 
-   !call hdf5_file_write(file, swrm, time, 'create', nout)
+   call hdf5_file_write(file, swrm, time, 'create', nout)
    
    
    deallocate(bin)
@@ -188,8 +186,6 @@ program main
 
    ! this causes problems when used with intel compilers, so just remove it in case you want to use one
    total = etime(elapsed)
-   end = omp_get_wtime()
    write(*,*) 'Elapsed time [s]: ', total, ' user:', elapsed(1), ' system:', elapsed(2)
-   write(*,*) 'run time [s]', end-start, 's'
 
 end

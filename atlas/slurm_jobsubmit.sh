@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=2DMCtimestepbigloop                   # Job name
+#SBATCH --job-name=2DMC_atlas_v4                   # Job name
 #SBATCH --partition=intel                      # Partition to use
 #SBATCH --qos=intel_default                    # QOS to be used
 #SBATCH --mail-type=BEGIN,END,FAIL,ALL         # Mail events (NONE, BEGIN, END, FAIL, ALL)
@@ -16,9 +16,9 @@
 if [ -n "$SLURM_CPUS_PER_TASK" ]; then
   omp_threads=$SLURM_CPUS_PER_TASK
 else
-  omp_threads=16
+  omp_threads=36
 fi
 export OMP_NUM_THREADS=$omp_threads
 
-./2DMC setup.par
+srun ./2DMC setup.par
 # End of submit file

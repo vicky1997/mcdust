@@ -66,7 +66,7 @@ module grid
          call rad_parallel_sort(swrm, r_order)
          swrm = swrm(r_order)
          else 
-           call shell_sort_r(swrm)
+           call sort_swrm_r(swrm)
          endif
       endif
       ! we allocate all the zones with 0 size (for stupid compilers)
@@ -167,12 +167,13 @@ module grid
    end subroutine make_grid_z
 
    ! makes 2D grid using cylindrical coordinates: r and z
-   subroutine make_grid(swrm, bin, rbin, nr, nz, smallr,totmass)
+   subroutine make_grid(swrm, bin, rbin, nr, nz, smallr,totmass,ncolls)
       use constants,  only: pi
       implicit none
       type(swarm), dimension(:), allocatable :: swrm
       type(list_of_swarms), dimension(:,:), allocatable, target       :: bin
       type(list_of_swarms), dimension(:),   allocatable               :: rbin
+      integer, dimension(:,:), allocatable                            :: ncolls
       integer                 :: nz      ! nr of zones in z
       integer                 :: nr      ! nominal nr of radial zones
       real, intent(in)        :: smallr  ! "evaporation radius" - inner edge of the simulation
@@ -186,6 +187,7 @@ module grid
       call make_grid_r(swrm, rbin, nrad, smallr,totmass)
       ! now we know how many r zones do we actually have, so we can allocate arrays
       allocate( bin(nrad,nz) )
+      allocate( ncolls(nrad,nz) )
       allocate( g%zlo(nrad,nz), g%zup(nrad,nz), g%zce(nrad,nz), g%dz(nrad,nz) )
       ! making the grid in z: separately for every radial zone
       !$OMP PARALLEL DO SCHEDULE(DYNAMIC)
@@ -254,6 +256,35 @@ module grid
 
       return
    end subroutine shell_sort_r
+
+
+   subroutine sort_swrm_r(lista)
+      implicit none
+      type(swarm), dimension(:), allocatable :: lista
+      real                                   :: temp
+      type(swarm)                            :: tempswarm
+      integer                                :: i, j
+
+      ! in this sort method the first element has to be already the smallest
+      !i = int(sum(minloc(lista(:)%zdis)))
+      i = int(sum(minloc(lista(:)%rdis)))
+      tempswarm = lista(i)
+      lista(i) = lista(1)
+      lista(1) = tempswarm
+
+      do i = 2, size(lista)
+         j = i - 1
+         temp = lista(i)%rdis
+         tempswarm = lista(i)
+         do while (j>=1 .and. lista(j)%rdis>temp)
+            lista(j+1) = lista(j)
+            j = j - 1
+         end do
+         lista(j+1) = tempswarm
+      enddo
+
+      return
+   end subroutine sort_swrm_r
 
    ! sorting swrm table by z using insertion sort algorithm
    subroutine sort_swrm_z(lista)
