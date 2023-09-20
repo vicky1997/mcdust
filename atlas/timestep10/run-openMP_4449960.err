@@ -1,0 +1,2 @@
+slurmstepd: error: execve(): /scratch/vaikundaraman/mcdust/atlas/timestep10/./2DMC: No such file or directory
+srun: error: atlas37: task 0: Exited with exit code 2

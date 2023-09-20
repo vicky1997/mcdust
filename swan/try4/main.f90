@@ -1,4 +1,4 @@
-!This code performes 2D simulation of dust evolution in protoplanetary disk.
+! This code performes 2D simulation of dust evolution in protoplanetary disk.
 ! The gas disk is treated 100% analytically (discstruct module)
 ! The dust is treated as representative particles (RPs) undergoing advection (advection module)
 ! as well as collisions performed with Monte Carlo algorithm (collisions module)

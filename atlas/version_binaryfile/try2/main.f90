@@ -57,8 +57,8 @@ program main
    write(*,*) 'Initializing representative bodies...'
    if (restart) then
       write(*,*) ' Reading restart...'
-      !call read_restart(Ntot, swrm)
-      call hdf5_file_read(Ntot, swrm)
+      call read_restart(Ntot, swrm)
+      !call hdf5_file_read(Ntot, swrm)
       write(*,*) '  restart read!'
       time = restime * year
       nout = nint(time/dtime)
@@ -89,8 +89,8 @@ program main
 
       ! producing output
       if (modulo(iter,fout) == 0 .or. time>=timeofnextout) then
-         !call write_output(swrm, nout)
-         call hdf5_file_write(file, swrm, time, 'create', nout)
+         call write_output(swrm, nout)
+         !call hdf5_file_write(file, swrm, time, 'create', nout)
          write(*,*) 'Time: ', time/year, 'produced output: ',nout
          open(23,file='timesout.dat',status='unknown',position='append')
          write(23,*) 'time: ', time/year, 'produced output: ',nout
@@ -164,6 +164,11 @@ program main
         enddo
       enddo
 
+      if(size(swrm)<65536) then
+         write(*,*) 'lost particle(s)',size(swrm),65536-size(swrm)
+         stop
+      endif 
+
       time = time + resdt
 
    enddo
@@ -171,11 +176,11 @@ program main
    !nout = nout+1
    write(*,*) 'time: ', time/year, 'produced output: ',nout
    open(23,file='timesout.dat',status='unknown',position='append')
-   !call write_output(swrm, nout)
+   call write_output(swrm, nout)
    write(23,*) 'time: ', time/year, 'produced output: ',nout
    close(23)
 
-   call hdf5_file_write(file, swrm, time, 'create', nout)
+   !call hdf5_file_write(file, swrm, time, 'create', nout)
    
    
    deallocate(bin)
