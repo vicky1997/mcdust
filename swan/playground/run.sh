@@ -1,0 +1,8 @@
+#!/bin/bash
+emailid=vaikundaraman@mps.mpg.de
+export OMP_NUM_THREADS=48
+mail -s 'BEGAN swan 51 losing particles test swan/try4' $emailid < /dev/null
+#\time --output=runtime.out ./2DMC setup.par > run.out 2>err.out
+#cat err.out runtime.out > details.out
+./2DMC setup.par > run.dat 2>err.dat
+mail -s 'swan 51 losing particles test swan/try4 done or error' $emailid < err.dat

@@ -23,7 +23,7 @@ module timestep
       real, intent(in)                               :: dtout
       real, intent(inout)                            :: final_dtime   ! final timestep
       real                                           :: old_dt
-      integer                                        :: i, j
+      integer                                        :: i, j, c=3
 
       old_dt = final_dtime
       final_dtime = dtout
@@ -36,9 +36,9 @@ module timestep
 
       do i = 1, size(ncolls(:,:),dim=1)
         do j = 1, size(ncolls(:,:),dim=2)
-          final_dtime = min(final_dtime, size(bin(i,j)%p) * old_dt / real(max(1,ncolls(i,j)))) !we don't want more collisions than ~ nr of particles in a zone per timestep
-          if (vertsett) final_dtime = min(final_dtime, g%dz(i,j)/maxval(abs(bin(i,j)%p(:)%velz))) ! don't let particles jump over cells in z
-          if (rdrift) final_dtime = min(final_dtime, g%dr(i)/maxval(abs(bin(i,j)%p(:)%velr))) ! don't let particles jump over cells in r
+          final_dtime = min(final_dtime, c*size(bin(i,j)%p) * old_dt / real(max(1,ncolls(i,j)))) !we don't want more collisions than ~ nr of particles in a zone per timestep
+          if (vertsett) final_dtime = min(final_dtime, c*g%dz(i,j)/maxval(abs(bin(i,j)%p(:)%velz))) ! don't let particles jump over cells in z
+          if (rdrift) final_dtime = min(final_dtime, c*g%dr(i)/maxval(abs(bin(i,j)%p(:)%velr))) ! don't let particles jump over cells in r
         enddo
       enddo
 

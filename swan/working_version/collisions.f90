@@ -7,7 +7,7 @@ module collisions
    use discstruct, only: cs, omegaK, densg, Pg, vgas, alpha, sigmag
    use grid,       only: g
    use initproblem,only: m0, mswarm
-   use parameters, only: matdens, r0, dmmax, con1, con2, vfrag, vertsett, rdrift, erosion_switch
+   use parameters, only: matdens, r0, dmmax, con1, con2, vfrag, vertsett, rdrift, erosion_switch, erosion_mass_ratio
    use types,      only: swarm, list_of_swarms
 
    implicit none
@@ -18,8 +18,9 @@ module collisions
    contains
 
    ! the routine performes collisional evolution on swarms located in the cell nr,ni with the aid of the MC algorithm
-   subroutine mc_collisions(nr, ni, bin, dtime, realtime, kk)
+   subroutine mc_collisions(nr, ni, bin, swrm, dtime, realtime, kk)
       implicit none
+      type(swarm), dimension(:), allocatable, target            :: swrm
       type(list_of_swarms), dimension(:,:), allocatable, target :: bin
       type(swarm), dimension(:), pointer              :: swarms      ! local rps array
       integer, intent(in)                             :: nr, ni      ! indices of the cell
@@ -44,6 +45,10 @@ module collisions
       integer, intent(out)                            :: kk ! collisions counter
       real                                            :: dustdens
       real                                            :: Kepler_freq, cs_speed
+      integer, dimension(7)                           :: flags, loc
+
+      flags(:) = 0
+      loc = (/1,2,3,4,5,6,7/)
 
       ! calculation of some values needed for calculations
       gasdens = densg(g%rce(nr),g%zce(nr,ni),realtime)         ! gas density in the center of cell
@@ -127,6 +132,17 @@ module collisions
       write(*,*) '       collisions in zone',nr,ni,'done: total',kk,'collisions'
 
       deallocate (colrates, accelncol, relvels, stokesnr, vs, vr, colri)
+
+      !write(*,*) '      Updating swrm:'            ! TODO: update only the modified swarms
+      do k = 1, nsws
+         l = 1
+         do while (swrm(l)%idnr /= swarms(k)%idnr)
+            l = l + 1
+         enddo
+         swrm(l) = swarms(k)
+      enddo
+      !write(*,*) '       swrm updated!'
+
 
       nullify(swarms)
 
@@ -259,7 +275,8 @@ module collisions
       colrates(nl,:) = swarms(:)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
       ! instead of perform 1000 identical collisions, we divide the collision rate by 1000 but if the collision happens,
       ! we stick 1000 small particles at once
-      where(accelncol(nl,:) > 0.0) colrates(nl,:) = colrates(nl,:) / accelncol(nl,:)
+      !where(accelncol(nl,:) > 0.0) colrates(nl,:) = colrates(nl,:) / accelncol(nl,:)
+      colrates(nl,:) = colrates(nl,:) / accelncol(nl,:)
       ! if the representative particle represents less than 1 particle, the method is not valid anymore,
       ! so the collision rate is supressed
       where(swarms(:)%npar <= 1.0) colrates(nl,:) = 0.0
@@ -279,7 +296,8 @@ module collisions
       real, intent(in)                                :: vol      ! volume of the cell
 
       colrates(:,nl) = swarms(nl)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
-      where(accelncol(:,nl) > 0.0) colrates(:,nl) = colrates(:,nl) / accelncol(:,nl)
+      !where(accelncol(:,nl) > 0.0) colrates(:,nl) = colrates(:,nl) / accelncol(:,nl)
+      colrates(:,nl) = colrates(:,nl) / accelncol(:,nl)
       where(swarms(:)%npar <= 1.0) colrates(:,nl) = 0.0
 
       return
@@ -296,7 +314,7 @@ module collisions
 
       accelncol_c => accelncol(nri,:)
 
-      accelncol_c(:) = 0.0
+      accelncol_c(:) = 1.0
       where ((swarms(:)%mass / swarms(nri)%mass) < dmmax)
          accelncol_c(:) = swarms(nri)%mass * dmmax / swarms(:)%mass
       endwhere
@@ -313,7 +331,7 @@ module collisions
 
       accelncol_r => accelncol(:,nri)
 
-      accelncol_r(:) = 0.0
+      accelncol_r(:) = 1.0
       where ((swarms(nri)%mass / swarms(:)%mass) < dmmax)
          accelncol_r(:) = swarms(:)%mass * dmmax / swarms(nri)%mass
       endwhere
@@ -374,10 +392,10 @@ module collisions
       if (rvel < vfrag) then
          call hit_and_stick(nri,nrk,swarms, accelncol)
       !else
-      !  call fragmentation(nri,swarms)
+       ! call fragmentation(nri,swarms)
       !endif
-      !else if (swarms(nri)%mass/swarms(nrk)%mass .ge. 10 .and. erosion_switch) then
-      !   call erosion(nri,nrk,swarms,accelncol)
+      else if (swarms(nri)%mass/swarms(nrk)%mass .ge. erosion_mass_ratio .and. erosion_switch) then
+         call erosion(nri,nrk,swarms,accelncol)
       else
          call fragmentation(nri, swarms)
       endif
@@ -393,12 +411,12 @@ module collisions
       type(swarm), dimension(:), pointer              :: swarms
       real, dimension(:,:), allocatable               :: accelncol
       
-      if (accelncol(nri, nrk) > 0.0) then
-         swarms(nri)%mass = swarms(nri)%mass + accelncol(nri, nrk) * swarms(nrk)%mass
-      else
-         swarms(nri)%mass = swarms(nri)%mass + swarms(nrk)%mass
-      endif
-
+      !if (accelncol(nri, nrk) > 0.0) then
+      !   swarms(nri)%mass = swarms(nri)%mass + accelncol(nri, nrk) * swarms(nrk)%mass
+      !else
+      !   swarms(nri)%mass = swarms(nri)%mass + swarms(nrk)%mass
+      !endif
+      swarms(nri)%mass = swarms(nri)%mass + accelncol(nri, nrk) * swarms(nrk)%mass
       return
    end subroutine hit_and_stick
 
@@ -434,11 +452,12 @@ module collisions
       p = swarms(nrk)%mass/swarms(nri)%mass
       call random_number(ran)
       if (ran .ge. p) then
-            if(accelncol(nri,nrk) > 0.0) then
-               swarms(nri)%mass = swarms(nri)%mass - accelncol(nri, nrk) * swarms(nrk)%mass
-            else
-               swarms(nri)%mass = swarms(nri)%mass - swarms(nrk)%mass
-            endif
+            !if(accelncol(nri,nrk) > 0.0) then
+            !   swarms(nri)%mass = swarms(nri)%mass - accelncol(nri, nrk) * swarms(nrk)%mass
+            !else
+            !   swarms(nri)%mass = swarms(nri)%mass - swarms(nrk)%mass
+            !endif
+            swarms(nri)%mass = swarms(nri)%mass - accelncol(nri, nrk) * swarms(nrk)%mass
       else
          swarms(nri)%mass = swarms(nrk)%mass
       endif
@@ -474,4 +493,17 @@ module collisions
       return
    end subroutine vel_rd_centr
 
+   subroutine bugflag(swarms, flag, loc)
+      implicit none
+      type(swarm), dimension(:), intent(in) :: swarms
+      integer, intent(inout) :: flag
+      integer, intent(in) :: loc
+      if (size(swarms)<65536) then
+         open(29,file='collflag.dat',status='unknown',position='append')
+         flag = flag + 1
+         write(29,*) 65536-size(swarms), flag, loc
+         write(*,*)'WARNING', 65536-size(swarms), 'particles lost at', loc, 'location in collisions subroutine for the',flag, 'time'
+         close(29)
+      endif
+   end subroutine bugflag
 end

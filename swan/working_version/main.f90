@@ -23,7 +23,7 @@ program main
    use timestep,     only: time_step
    use types
    use hdf5
-   use hdf5output, only: hdf5_file_write, hdf5_file_t
+   use hdf5output, only: hdf5_file_write, hdf5_file_t, hdf5_file_read
 
    implicit none
 
@@ -44,6 +44,7 @@ program main
    character(len=100)  :: ctrl_file           ! parameter file
    real                :: mdust               ! mass of dust ! TODO: can be merged with totmass?
    integer, dimension(:,:), allocatable :: ncolls
+   integer :: flag_1 = 0, loc, flag_2 = 0, flag_3 = 0, flag_4 = 0
    !real, dimension(:), allocatable  :: mgrid  ! mass grid
 
    ! random number generator initialization
@@ -57,8 +58,8 @@ program main
    write(*,*) 'Initializing representative bodies...'
    if (restart) then
       write(*,*) ' Reading restart...'
-      call read_restart(Ntot, swrm)
-      !call hdf5_file_read(Ntot, swrm)
+      !call read_restart(Ntot, swrm)
+      call hdf5_file_read(Ntot, swrm)
       write(*,*) '  restart read!'
       time = restime * year
       nout = nint(time/dtime)
@@ -114,8 +115,18 @@ program main
          resdt = 1./omegaK(minval(swrm(:)%rdis))
       else
          call time_step(bin, ncolls, timeofnextout-time, resdt)
-      
       end if
+
+      if (size(swrm)<65536) then
+         open(25,file='particleflag.dat',status='unknown',position='append')
+         flag_1 = flag_1 + 1
+         loc=0
+         write(25,*) 65536-size(swrm), flag_1, time, loc
+         write(*,*)'WARNING', 65536-size(swrm), 'particles lost at',time, 'yr after timestep for the',flag_1, 'st time'
+         close(25)
+      endif
+
+
       write(*,*) ' Performing advection: timestep',resdt/year,'yrs'
       if (db_data) then
          open(23,file='timestep.dat',status='unknown',position='append')
@@ -126,7 +137,7 @@ program main
       ! performing advection
       call mc_advection(swrm, resdt, time)
       write(*,*) '  advection done'
-
+    
 
       ! removing old grid and building new one
       call deallocate_grid
@@ -137,10 +148,6 @@ program main
       call make_grid(swrm, bin, rbin, nr, nz, smallr,totmass, ncolls)
       write(*,*) '     grid done'
 
-      !deallocate(ncolls)
-      deallocate(swrm)
-      !allocate(ncolls(nr,nz))
-
       ! performing collisions
       write(*,*) '   Performing collisions...'
 
@@ -149,20 +156,23 @@ program main
          do j = 1, size(g%zce,dim=2)
             if (.not.allocated(bin(i, j)%p)) cycle
             write(*,*) '    entering zone',i,j,'including ',size(bin(i, j)%p),' rbs','.....'
-            call mc_collisions(i, j, bin, resdt, time, ncolls(i,j))
+            call mc_collisions(i, j, bin, swrm, resdt, time, ncolls(i,j))
          enddo
       enddo
       !$OMP END PARALLEL DO
 
       write(*,*) '    collisions done!'
 
-      ! build the new swrm list after collisions
-      allocate(swrm(0))
-      do i = 1, size(g%rce)
-        do j = 1, size(g%zce,dim=2)
-          swrm = [swrm, bin(i, j)%p(:)]
-        enddo
-      enddo
+
+      if (size(swrm)<65536) then
+         open(25,file='particleflag.dat',status='unknown',position='append')
+         flag_4 = flag_4 + 1
+         loc=3
+         write(25,*) 65536-size(swrm), flag_4, time,loc
+         write(*,*)'WARNING', 65536-size(swrm), 'particles lost at',time, 'yr after collisions for the',flag_4, 'st time'
+         close(25)
+      endif
+    
 
       time = time + resdt
 
