@@ -1,2 +1,0 @@
-slurmstepd: error: execve(): /2DMC: No such file or directory
-srun: error: atlas20: task 0: Exited with exit code 2
