@@ -1,19 +1,13 @@
-To compile the code: make
+To compile the code: 
 
-parameter file: setup.par
+make SETUP_FILE=default
+
+parameter file: setups/default/setup.par
 
 To run the code: 
 
-export OMP_NUM_THREADS=number of CPUs
+export OMP_NUM_THREADS=number_of_CPUs
 
-./2DMC setup.par
+./default setup.par
 
-or use the script, (you will have to modify the script a bit to add your emails) 
-
-./run.sh
-
-To run the code via a SLURM batch script 
-
-sbatch slurm_jobsubmit.sh
-
-(You need to modify the contents of the script to suit your slurm account and cluster)
+For more details: [mcdust Documentation](https://www.mcdust.github.io/)
