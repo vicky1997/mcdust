@@ -10,4 +10,4 @@ export OMP_NUM_THREADS=number_of_CPUs
 
 ./default setup.par
 
-For more details: [mcdust Documentation](https://www.mcdust.github.io/)
+For more details: [mcdust Documentation](https://mcdust.readthedocs.io/en/latest/)
