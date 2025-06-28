@@ -10,6 +10,8 @@ To install the required software in Ubuntu(if you are not running it in a cluste
 `sudo apt-get install gfortran`
 `sudo apt-get install libhdf5-serial-dev`
 
+Python is not required to run the code. But if you want to use the routines to read/write data from the simulation you will need a python installation.
+
 ## To compile the code: 
 
 `make SETUP_FILE=default`
