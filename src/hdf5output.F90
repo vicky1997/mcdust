@@ -5,11 +5,11 @@
 ! File structure
 ! --------------------------------------------------------------------------------
 ! Attributes
-! code - mcdust v0.1
-! author - Dr Joanna Drazkowska
+! code - mcdust v1.0
+! author - Dr Joanna Drazkowska, Vignesh Vaikundaraman, Nerea Gurrutxaga
 ! mass_of_swarm - mswarm - mass of a swarm
 ! output_number - nout - output number of file
-! number_of_particles_per_cell - ncell - 
+! number_of_particles_per_cell - ncell 
 ! number_or_radial_zones - nr
 ! number_of_vertical_zones - nz
 ! steps_between_outputs - fout
@@ -73,15 +73,12 @@ module hdf5output
     type(hdf5_file_t), intent (out) :: this
     character(len=15) :: filename
     character(len=200) :: filepath
-    !character(len=41) ::path
     type (swarm), dimension(:), intent(in) :: swrm
-    !character(len=*), intent (in) :: mode
     integer, intent (in) :: outnr
     real, intent(in) :: mswarm
     real, intent (in) :: time, resdt
     real :: timeout, resdtout
     integer :: error
-    !filename = 'swarms.h5'
     write(filename,'(a7,i5.5,a3)') 'swarms-',outnr,'.h5'
     filepath = trim(path)//"/"//trim(filename)
     call h5open_f(error)
@@ -151,7 +148,7 @@ module hdf5output
     real, intent(in), target :: times
     type(hdf5_file_t), intent(inout) :: this
     integer, parameter :: rank_t = 1
-    type(C_PTR) :: f_ptr, f_ptr2 
+    type(C_PTR) :: f_ptr
     integer(HSIZE_T) :: time_dims(rank_t), time_maxdims(rank_t), time_chunkdims(rank_t)
 
     f_ptr = C_LOC(times)
@@ -182,7 +179,6 @@ module hdf5output
     type(hdf5_file_t), intent(inout)  :: this
     type(swarm), dimension(:), intent(in)        :: tempswrm
     type(swarm), dimension(size(tempswrm)), TARGET        :: swrm
-    !integer(HID_T) :: memtype
     swrm = tempswrm
     call h5tcreate_f(H5T_COMPOUND_F, H5OFFSETOF(C_LOC(swrm(1)),C_LOC(swrm(2))), & 
                                                                   this%memtype, this%error)
@@ -211,8 +207,8 @@ module hdf5output
     real :: mswarm, resdtout
     integer :: nout
     call h5fcreate_f(filename, H5F_ACC_TRUNC_F, this% id, this% error) ! creates file
-    call hdf5_write_att(this%id, 'code', 'mcdust   v0.1')
-    call hdf5_write_att(this%id, 'author', 'Dr Joanna Drazkowska')
+    call hdf5_write_att(this%id, 'code', 'mcdust   v1.0')
+    call hdf5_write_att(this%id, 'authors', 'Dr Joanna Drazkowska, Vignesh Vaikundaraman, Nerea Gurrutuxaga')
     call hdf5_write_att(this%id, 'output_number', nout)
     call hdf5_write_att(this%id, 'mass_of_swarm[g]', mswarm)
     call hdf5_write_att(this%id, 'number_of_particles', Ntot)
@@ -228,14 +224,12 @@ module hdf5output
     call hdf5_write_att(this%id, 'material_density_[g/cm3]', matdens)
     call hdf5_write_att(this%id, 'dmmax', dmmax)
     call hdf5_write_att(this%id, 'evaporation_radius_[AU]', smallr)
-    call hdf5_write_att(this%id, 'dust_to_gas_ratio', dtg)
-    !call hdf5_write_att(this%id, 'restart', restart)    
+    call hdf5_write_att(this%id, 'dust_to_gas_ratio', dtg)  
     call hdf5_write_att(this%id, 'fragmentation_velocity_[cm/s]', vfrag)
     call hdf5_write_att(this%id, 'alpha_t', alpha_t)
     call hdf5_write_att(this%id, 'sigma_gas_[g/cm2]', sigmag0)
     call hdf5_write_att(this%id, 'temperature_[K]', temperature)
     call hdf5_write_att(this%id, 'pressure_gradient_eta', eta)
-    
     call hdf5_write_att(this%id, 'data_directory', datadir) 
     call hdf5_write_att(this%id, 'final_timestep[yr]', resdtout) 
 #ifdef EROSION
@@ -353,7 +347,6 @@ module hdf5output
     ! close dependencies
     call h5dclose_f(this%dset_id, this%error)
     call h5sclose_f(this%dspace_id, this%error)
-    !call h5fclose_f(this%id, this%error)
     call hdf5_file_close(this, this%swarms)
     
     do i = 1, Ntot

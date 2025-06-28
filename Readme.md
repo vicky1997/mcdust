@@ -6,15 +6,22 @@
 
 `gfortran` `hdf5-serial` `python`
 
+To install the required software in Ubuntu(if you are not running it in a cluster, this requires root permissions):
+`sudo apt-get install gfortran`
+`sudo apt-get install libhdf5-serial-dev`
+
 ## To compile the code: 
 
 `make SETUP_FILE=default`
 
 This uses the setup files from the default run in `/setups/default/` 
-The setup files can be modified to suit your needs and can be added to the `setups` directory.
+The setup files can be modified to suit your needs and can be added to the `setups` directory. An executable in the name of the setup file will be created in the root directory which is `default` in this case.
 
 parameter file: setups/default/setup.par
 
+To run the unit tests:
+
+`make test SETUP_FILE=tests`
 ## To run the code: 
 
 export OMP_NUM_THREADS=number_of_CPUs

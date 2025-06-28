@@ -14,14 +14,11 @@ module parallel_sort
     contains
 
  subroutine Z_parallel_sort (A, order)
-    !real(8), intent(in),  dimension(:) :: A
-    !integer, intent(out), dimension(size(A)) :: order
     type(swarm), intent(in), dimension(:) :: A
     integer, intent(out), dimension(:) :: order 
 
     integer :: ilen, from, middle, ito, nthreads, thread, chunk, chunk2, i, iremainder, extraThread
 
-    !allocate(order(size(A)))
     ilen      = size(A)
     nthreads = omp_get_max_threads()
     chunk    = ilen / nthreads
@@ -83,8 +80,6 @@ module parallel_sort
   !> Merge two parts of A, ordered by order from left to right
   !! around middle.
   subroutine Z_merge (A, order, left, middle, right)
-    !real(8), intent(in), dimension(:) :: A
-    !integer, intent(inout), dimension(size(A)) :: order
     type(swarm), intent(in), dimension(:) :: A
     integer, intent(out), dimension(:) :: order    
 
@@ -95,9 +90,6 @@ module parallel_sort
 
     integer, dimension(left    :middle) :: orderA
     integer, dimension(middle+1:right ) :: orderB
-    !type(swarm), dimension(left    :middle) :: orderA
-    !type(swarm), dimension(middle+1:right ) :: orderB
-    !allocate(order(size(A)))
 
     ! copy order
     orderA = order(left    :middle)
@@ -211,8 +203,6 @@ module parallel_sort
   !> Merge two parts of A, ordered by order from left to right
   !! around middle.
   subroutine rad_merge (A, order, left, middle, right)
-    !real(8), intent(in), dimension(:) :: A
-    !integer, intent(inout), dimension(size(A)) :: order
     type(swarm), intent(in), dimension(:) :: A
     integer, intent(out), dimension(:) :: order    
 
@@ -223,9 +213,6 @@ module parallel_sort
 
     integer, dimension(left    :middle) :: orderA
     integer, dimension(middle+1:right ) :: orderB
-    !type(swarm), dimension(left    :middle) :: orderA
-    !type(swarm), dimension(middle+1:right ) :: orderB
-    !allocate(order(size(A)))
     ! copy order
     orderA = order(left    :middle)
     orderB = order(middle+1:right)

@@ -68,10 +68,7 @@ module collisions
       v0 = sqrt(alpha(g%rce(nr))) * cs_speed                                 ! velocity of the largest eddy
       veta = v0 * Reynolds**(-0.25)                                               ! velocity of the smallest eddy
       tL = 1. / Kepler_freq
-      !tL = 1. / omegaK(g%rce(nr))                                                 ! overturn time of the largest eddy
       teta = Reynolds**(-0.5) * tL                                                ! overturn time of the smallest eddy
-      !vn = 0.25 * (Pg(g%rce(nr)+1., g%zce(nr,ni),realtime) - Pg(g%rce(nr)-1., g%zce(nr,ni), realtime)) / &  ! maximum radial velocity from the pressure gradient
-              !densg(g%rce(nr),g%zce(nr,ni),realtime) / omegaK(g%rce(nr))
       vn = 0.25 * (Pg(g%rce(nr)+1., g%zce(nr,ni),realtime) - Pg(g%rce(nr)-1., g%zce(nr,ni), realtime)) / &  ! maximum radial velocity from the pressure gradient
               gasdens / Kepler_freq
       Vg2 = 1.5 *v0**2.0                                                          ! turbulent velocity of gas squared
@@ -144,9 +141,6 @@ module collisions
       do k = 1, nsws
          if(swarms(k)%coll_f /= 0) then
             l = first_idx
-            !do while (swrm(l)%idnr /= swarms(k)%idnr)
-            !   l = l + 1
-            !enddo
             l = FINDLOC(swrm(:)%idnr,swarms(k)%idnr,dim=1)
             swrm(l) = swarms(k)
          else

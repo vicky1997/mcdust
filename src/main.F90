@@ -19,7 +19,6 @@ program main
    use discstruct,   only: cs, omegaK, gasmass
    use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, restime, minrad0, &
                            maxrad0, matdens, r0, dtg, db_data
-   use output,       only: write_output, read_restart
    use timestep,     only: time_step
    use types
    use hdf5
@@ -44,7 +43,6 @@ program main
    character(len=100)  :: ctrl_file           ! parameter file
    real                :: mdust               ! mass of dust ! TODO: can be merged with totmass?
    integer, dimension(:,:), allocatable :: ncolls
-   !real, dimension(:), allocatable  :: mgrid  ! mass grid
 
    ! random number generator initialization
    call init_random_seed

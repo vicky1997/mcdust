@@ -30,7 +30,7 @@ test: $(TEST)
 $(OBJ_DIR)/%.o: %.F90 | $(OBJ_DIR)
 	$(H5F) $(FFLAGSTEST) $(CFLAGS) -J$(OBJ_DIR) -c $< -o $@
 
-$(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
+$(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
 	$(H5F) $(FFLAGSTEST) $(CFLAGS) $(LDFLAGS) $? -o $@
 
 # setup:
@@ -44,7 +44,7 @@ $(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $
 #	$(OBJ_DIR)/%.o: %.F90 | $(OBJ_DIR)
 #		$(H5F) $(FFLAGSTEST) $(CFLAGS) -J$(OBJ_DIR) -c $< -o $@
 
-$(TEST): $(OBJ_DIR)/testsuite.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
+$(TEST): $(OBJ_DIR)/testsuite.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
 	$(H5F) $(FFLAGSTEST) $(CFLAGS) $(LDFLAGS) $? -o $@
 
 
@@ -58,10 +58,10 @@ $(OBJ_DIR)/mrgrnk.o: $(SRC_DIR)/mrgrnk.F90 $(OBJ_DIR)/types.o
 $(OBJ_DIR)/parallel_sort.o: $(SRC_DIR)/parallel_sort.F90 $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/types.o
 $(OBJ_DIR)/grid.o: $(SRC_DIR)/grid.F90 $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o
 $(OBJ_DIR)/collisions.o: $(SRC_DIR)/collisions.F90 $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/types.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/constants.o
-$(OBJ_DIR)/output.o: $(SRC_DIR)/output.F90 $(OBJ_DIR)/grid.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
+#$(OBJ_DIR)/output.o: $(SRC_DIR)/output.F90 $(OBJ_DIR)/grid.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
 $(OBJ_DIR)/timestep.o: $(SRC_DIR)/timestep.F90 $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
 $(OBJ_DIR)/hdf5output.o: $(SRC_DIR)/hdf5output.F90 $(OBJ_DIR)/grid.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
-$(OBJ_DIR)/main.o: $(SRC_DIR)/main.F90 $(OBJ_DIR)/timestep.o $(OBJ_DIR)/output.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
+$(OBJ_DIR)/main.o: $(SRC_DIR)/main.F90 $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
 $(OBJ_DIR)/testsuite.o: $(TEST_DIR)/testsuite.F90 $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
 
 $(OBJ_DIR):

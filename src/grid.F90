@@ -86,12 +86,6 @@ module grid
 
       allocate(rbin(nrad))
       
-      ! I dont think the following is necessary:
-      ! we allocate all the zones with 0 size (for stupid compilers)
-      !do i = 1, nrad
-      !   allocate(rbin(i)%p(0))
-      !enddo
-      
       ! save first index in swrm for every radial grid: useful in collision subroutine
       rbin(1)%first_idx = 1 + nin
       do i = 2, nrad
@@ -151,12 +145,6 @@ module grid
 
       ! sorting the particles by z
       if (nz > 1) call sort_swrm_z(rbin(k)%p)
-
-      ! I dont think the following is necessary:
-      ! stupid compilers workaround
-      !do i = 1, nz
-      !   allocate(bin(k,i)%p(0))
-      !enddo
 
       ! how many particles per zone?
       allocate(nzzone_arr(nz))
@@ -235,15 +223,6 @@ module grid
          g%vol(i,:) = pi * (g%rup(i)**2 - g%rlo(i)**2) * g%dz(i,:)
       enddo
       g%totvol = sum(g%vol(:,:))
-      !open(33,file='grid.txt', status='unknown')
-      !do x=1,nrad
-      !   do y=1,nz
-      !      write(33,*) g%rlo(x)/AU, g%rce(x)/AU, g%rup(x)/AU, g%zlo(x,y)/AU, g%zce(x,y)/AU, g%zup(x,y)/AU
-      !   enddo
-      !enddo
-      !close(3)
-      !write(*,*) 'write loop done'
-      !stop
       return
    end subroutine make_grid
 
