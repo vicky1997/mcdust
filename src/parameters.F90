@@ -185,6 +185,7 @@ module parameters
         con2 = (0.75 / pi / matdens)**third
         
         close(fh)
+
         write(command,*) './directory.sh '//trim(datadir)
         CALL SYSTEM(command)
         open(unit=2,file='outputs/path.txt',action='read') !read path from file

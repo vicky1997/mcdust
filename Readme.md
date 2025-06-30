@@ -6,7 +6,7 @@
 
 `gfortran` `hdf5-serial` `python`
 
-To install the required software in Ubuntu(if you are not running it in a cluster, this requires root permissions):
+To install the required software in Ubuntu(this requires root permissions):
 `sudo apt-get install gfortran`
 `sudo apt-get install libhdf5-serial-dev`
 
@@ -28,9 +28,9 @@ To run the unit tests:
 
 export OMP_NUM_THREADS=number_of_CPUs
 
-./default setup.par
+./default /setups/default/setup.par
 
 For more details: [mcdust Documentation](https://mcdust.readthedocs.io/en/latest/)
 
-# Acknowledgments
+## Acknowledgments
 The authors acknowledge funding from the European Union under the European Union’s Horizon Europe Research \& Innovation Programme 101040037 (PLANETOIDS). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Council. Neither the European Union nor the granting authority can be held responsible for them.

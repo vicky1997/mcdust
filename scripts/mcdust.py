@@ -52,12 +52,12 @@ class Swarm:
         snapshottime = np.zeros(par.ntime)
         f1 = os.path.join(par.datadir+'swarms-00000.h5')
         with h5py.File(f1,"r") as f:
-            a1 = f.attrs['author'].decode('UTF-8')
+            a1 = f.attrs['authors'].decode('UTF-8')
             a2 = f.attrs['code'].decode('UTF-8')
-            a3 = f.attrs['mass_of_swarm']
+            a3 = f.attrs['mass_of_swarm[g]']
             a4 = f.attrs['output_number']
             print(str(a2))
-            print("Author : " + str(a1))
+            print("Authors : " + str(a1))
             self.mswarm = a3
             f.close()
         print("Please cite Drążkowska, Windmark & Dullemond (2013) A&A 556, A37")
@@ -71,13 +71,13 @@ class Swarm:
                 swarmlist = dset[...]
                 timesout = dset1[...]
                 f.close()
-            self.idnr[iout,:] = np.array(swarmlist['id_number'])
-            self.mass[iout,:] = np.array(swarmlist['mass_of_a_particle_[g]'])
-            self.rdis[iout,:] = np.array(swarmlist['cylindrical_radius_[AU]'])
-            self.zdis[iout,:] = np.array(swarmlist['height_above_midplane_[AU]'])
-            self.St[iout,:]   = np.array(swarmlist['Stokes_number'])
-            self.velr[iout,:] = np.array(swarmlist['Radial_velocity_v_r_[cm/s]'])
-            self.velz[iout,:] = np.array(swarmlist['Vertical_velocity_v_z_[cm/s]'])
+            self.idnr[iout,:] = np.array(swarmlist['id number'])
+            self.mass[iout,:] = np.array(swarmlist['mass of a particle [g]'])
+            self.rdis[iout,:] = np.array(swarmlist['cylindrical radius [AU]'])
+            self.zdis[iout,:] = np.array(swarmlist['height above midplane [AU]'])
+            self.St[iout,:]   = np.array(swarmlist['Stokes number'])
+            self.velr[iout,:] = np.array(swarmlist['Radial velocity v_r [cm/s]'])
+            self.velz[iout,:] = np.array(swarmlist['Vertical velocity v_z [cm/s]'])
             snapshottime[iout]= timesout
         self.indens = self.indens*par.rho_s
         con = np.zeros_like(self.St)
@@ -192,20 +192,20 @@ class Params :
         self.datadir = path + self.datadir + '/'
         nroutputs = len(glob.glob1(self.datadir+'/',"*.h5"))   
         self.ntime = nroutputs
-    def read_params_hdf5(self,dir_name='default/data'):
+    def read_params_hdf5(self,path):
         """Read parameters directly from the hdf5 file
 
         Args:
-            dir_name (str, optional): path to the hdf5 data file. Defaults to 'default/data'.
+            path (str): path to the hdf5 data files.
         """    
-        path = os.path.join('outputs/'+ dir_name + '/' + 'swarms-00000.h5')
-        self.datadir = os.path.join('outputs/'+ dir_name + '/')
-        print(' Reading paramter file from ' + path)
-        with h5py.File(path,"r") as f:
-            self.nswarms = f.attrs['number_of_particles']
-            self.n_cell = f.attrs['number_of_particles_per_cell']
-            self.nr = f.attrs['number_of_radial_zones']
-            self.nz = f.attrs['number_of_vertical_zones']
+        self.datadir = os.path.join(path + '/')
+        path_file0 = os.path.join(path + 'swarms-00000.h5')
+        print(' Reading paramters file from data files in '+ path )
+        with h5py.File(path_file0,"r") as f:
+            self.nswarms = int(f.attrs['number_of_particles'])
+            self.n_cell = int(f.attrs['number_of_particles_per_cell'])
+            self.nr = int(f.attrs['number_of_radial_zones'])
+            self.nz = int(f.attrs['number_of_vertical_zones'])
             self.t_end = f.attrs['maximum_time_of_simulation[yr]']
             self.minr = f.attrs['minimum_radius_[AU]']
             self.maxr = f.attrs['maximum_radius_[AU]']
@@ -218,6 +218,7 @@ class Params :
             self.tgas = f.attrs['temperature_[K]']
             self.eta = f.attrs['pressure_gradient_eta']
             self.erosion_m_ratio = f.attrs['erosion_mass_ratio']
+            self.alpha = f.attrs['alpha_t']
             f.close()
         self.ntime = len(glob.glob1(self.datadir+'/',"*.h5"))    
 #TODO: function to write parameter files needed to start the code
@@ -232,15 +233,17 @@ class Simulation:
         self.pars = None
         self.disk = None
     def read(self,path):
-        """Function to read the data files, parameter files and create a simple disk model
+        """Function to read the data files, parameter files and create a simple disk model.
+           The parameters are read from the hdf5 files. If you want it to be read from the setup.par
+           file in the setups directory, it has be to modified.
 
         Args:
-            path (str): path to parameter file
+            path (str): path to data directory
         """        
         #self.pars.read_params(path)
         #self.swarms.read_hdf5(self.pars)
         self.pars = Params()
-        self.pars.read_params(path)
+        self.pars.read_params_hdf5(path)
         self.swarms = Swarm(self.pars)
         self.swarms.read_hdf5(self.pars)
         self.disk = Diskbuild(rmin=self.pars.minr,rmax=self.pars.maxr)

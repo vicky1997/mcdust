@@ -6,3 +6,4 @@
 *.dat
 default
 outputs/default1/
+slurm_jobsubmit.sh

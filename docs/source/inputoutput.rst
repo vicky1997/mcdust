@@ -13,7 +13,7 @@ This is the file to specify the simulation parameters. The parameters to be ente
 | :code:`number_of_radial_zones`  -  Number of radial grids            
 | :code:`number_of_vertical_zones` -  Number of vertical grids                 
 | :code:`steps_between_outputs`  - Number of iterations between outputs                   
-| :code:`time_between_outputs_[yrs]` - time duration between outputs               
+| :code:`time_between_outputs_[yrs]` - time interval between outputs               
 | :code:`maximum_time_of_simulation_[yrs]`  - simulation time in yrs
 | :code:`minimum_radius_[AU]` - inner radial boundary of the simulation in AU                      
 | :code:`maximum_radius_[AU]` - outer radial boundary of the simulation in AU                      
@@ -24,19 +24,19 @@ This is the file to specify the simulation parameters. The parameters to be ente
 | :code:`dust_to_gas_ratio` - the dust to gas ratio in the disk                        
 | :code:`fragmentation_velocity_[cm/s]` - fragmentation velocity of the particles            
 | :code:`alpha` - the alpha turbulence value to specifiy the strength of the turbulence in the disk                                   
-| :code:`sigma_gas_[g/cm2]` - the gas surface density at 1 AU                        
-| :code:`temperature_[K]`  - the temperature in K at 1 AU                         
+| :code:`sigma_gas_[g/cm2]` - gas surface density at 1 AU                        
+| :code:`temperature_[K]`  - temperature in K at 1 AU                         
 | :code:`erosion_mass_ratio` - mass ratio condition to trigger erosion                     
 | :code:`data_directory` - directory name to write the data  
 | :code:`restart` - to be set to true if we are starting a simulation from a snapshot
 
 
-If the values for the parameters are not entered in the file, the default values will be taken as specified in the :code:`parameters.f90` file. New parameters can also be added to the simulation via the :code:`parameters.f90` file.
+If the values for the parameters are not specified in the :code:`setup.par` file, the default values will be taken as specified in the :code:`parameters.F90` file. New parameters can also be added to the simulation via the :code:`parameters.F90` file.
 
 
 Input file 2: :code:`preprocs.opt`
 --------------------------
-This file specifies the regions of the code to be compiled based on compiler options. The current compiler options are listed
+This file specifies the regions of the code to be compiled based on compiler options. The current compiler options are listed:
 
 | :code:`VERTICALMODEL`: activate this to setup a 1D vertical model
 | :code:`TRANSPORT`: activate dust transport
@@ -46,15 +46,15 @@ This file specifies the regions of the code to be compiled based on compiler opt
 | :code:`EROSION`: activate erosion as a collision outcome
 | :code:`AUXDATA`: write timestep data
 
-Comment on uncomment the options in the file based on the setup of the run.
+Comment or uncomment the options with # in the file based on the setup of the run.
 
 
 Output
 ++++++
 
-The output files are of the hdf5 file format with the extension :code:`.h5`. Each snapshot has its own file and can accessed in :code:`outputs/` directory.
+The output files are of the HDF5 file format with the extension :code:`.h5`. Each snapshot has its own file and can accessed in :code:`outputs/` directory.
 
-Each data file contains the properties of each representative particle (called as a swarm). The properties that are stored in the default version are given below.
+Each data file contains the properties of all representative particles (called as swarms). The properties that are stored in the default version are given below:
 
 | ID number of swarm
 | mass of the representative particle in grams
@@ -72,7 +72,7 @@ The metadata of the code can be accessed using the :code:`h5dump` command as sho
     
     h5dump -H data/swarms-00000.h5
 
-The output of the command shows us the metadata of the file :code:`swarms-00000.h5`
+The output of the command shows the metadata of the file :code:`swarms-00000.h5`
 
 .. code-block:: bash
 
@@ -126,4 +126,4 @@ The output of the command shows us the metadata of the file :code:`swarms-00000.
     }
     }
 
-To add new properties to be written, one can add the same in the :code:`hdf5output.f90` file. 
+To add new properties to the data, one can modify the :code:`hdf5output.F90` file. 

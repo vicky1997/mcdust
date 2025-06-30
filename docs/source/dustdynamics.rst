@@ -1,7 +1,7 @@
 Dust dynamics
 =============
 
-The transport of dust particles is determined the disk properties (radial drift, settling) and the turbulence levels of the disk (diffusion).
+The transport of dust particles is determined by the disk properties (radial drift, settling, turbulence).
 We briefly explain the different components of the dust velocites in this section. For further detail we refer the reader to Drazkowska et al 2013.
 
 Radial velocity
@@ -32,7 +32,7 @@ In the vertical direction, settling of the dust particles due to the gravity of 
 
     v_d^z = -z\Omega_K \mathrm{St}
 
-The diffusion in the vertical direction is implemented in the same way as in the radial direction as turbulent kicks (replacing :math:`Delta r` with :math:`\Delta z`).
+The diffusion in the vertical direction is implemented in the same way as in the radial direction as turbulent kicks (replacing :math:`\Delta r` with :math:`\Delta z`).
 
 Advection timestep
 ++++++++++++++++++
@@ -43,14 +43,16 @@ To properly resolve advection we limit the timestep according to the Courant con
 
 .. math:: 
 
-    \Delta t^x \lt \frac{\Delta x_{\mathrm{min}}}{v^x_{\mathrm{max}}}
+    \Delta t^x = \frac{\Delta x_{\mathrm{min}}}{v^x_{\mathrm{max}}},
 
-This is calculated for both the radial and vertical directions and the the minimum is chosen :math:`\Delta t^d = \mathrm{min}(\Delta t^r, \Delta t^z)`.
+where 
+
+This is calculated for both the radial and vertical directions and the minimum is chosen :math:`\Delta t^d = \mathrm{min}(\Delta t^r, \Delta t^z)`.
 
 We do not want more collisions than the number particles in a cell per timestep, this limit is implemented by
 
 .. math:: 
 
-    \Delta t^c = \frac{n_{\mathrm{cell}}}{n_{\mathrm{max}}^{\mathrm{coll}}} \Delta t_{\mathrm{old}}
+    \Delta t^c = \frac{n_{\mathrm{cell}}}{n_{\mathrm{max}}^{\mathrm{coll}}} \Delta t_{\mathrm{old}},
 
-The final timstep is chosen as a minimum of both the advection and collision limits :math:`\Delta t = \mathrm{min}(\Delta t^d, \Delta t^c)`
+where :math:`n_{\mathrm{cell}}` is the number of particles in a cell and :math:`n_{\mathrm{max}}^{\mathrm{coll}}` is the maximum number of collisions from the previous timestep. The final timestep is chosen as a minimum between the advection and collision limits :math:`\Delta t = \mathrm{min}(\Delta t^d, \Delta t^c)`

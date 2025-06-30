@@ -19,7 +19,7 @@ program main
    use initproblem,  only: init_swarms, init_random_seed, m0, mswarm, nord
    use discstruct,   only: cs, omegaK, gasmass
    use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, restime, minrad0, &
-                           maxrad0, matdens, r0, dtg, db_data
+                           maxrad0, matdens, r0, dtg, db_data, path
    use timestep,     only: time_step
    use types
    use hdf5
@@ -96,7 +96,7 @@ program main
          call update_St(swrm, time) ! update Stokes number; it will later be update during advection too
          call hdf5_file_write(file, swrm, time, nout, mswarm,resdt)
          write(*,*) 'Time: ', time/year, 'produced output: ',nout
-         open(23,file='outputs/timesout.dat',status='unknown',position='append')
+         open(23,file=trim(path)//trim('/timesout.dat'),status='unknown',position='append')
          write(23,*) 'time: ', time/year, 'produced output: ',nout
          close(23)
          timeofnextout = time+dtime
@@ -107,7 +107,7 @@ program main
 
       ! writing max mass value for each timestep for bug fixes
       if(db_data) then
-         open(123,file='outputs/mmax.dat',position='append')
+         open(123,file=trim(path)//trim('/mmax.dat'),position='append')
          write(123,*) time/year, maxval(swrm(:)%mass)
          close(123)
       endif
@@ -115,7 +115,7 @@ program main
 
       write(*,*) ' Performing advection: timestep',resdt/year,'yrs'
       if (db_data) then
-         open(23,file='outputs/timestep.dat',status='unknown',position='append')
+         open(23,file=trim(path)//trim('/timestep.dat'),status='unknown',position='append')
          write(23,*) time/year,resdt/year
          close(23)
       endif
@@ -156,7 +156,7 @@ program main
    ! ---- END OF THE MAIN LOOP -----------------------------------------------------------------------------------------
 
    write(*,*) 'time: ', time/year, 'produced output: ',nout
-   open(23,file='outputs/timesout.dat',status='unknown',position='append')
+   open(23,file=trim(path)//trim('/timesout.dat'),status='unknown',position='append')
    write(23,*) 'time: ', time/year, 'produced output: ',nout
    close(23)
    call update_St(swrm, time)
