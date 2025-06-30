@@ -1,6 +1,7 @@
-!this module performs parallel sorting of a given array
+! this module performs parallel sorting of a given array
 ! an array of swarms here specifically.
 ! routines taken from https://github.com/cphyc/Fortran-parallel-sort
+! in accordance with CC0 v1.0 Universal license
 module parallel_sort
 
     use omp_lib
