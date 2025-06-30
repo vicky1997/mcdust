@@ -3,3 +3,6 @@
 *.mod
 *.gcno
 *.o
+*.dat
+default
+outputs/default1/

@@ -1,7 +1,6 @@
 F90=gfortran
 H5F=h5fc
 FFLAGSTEST=-ffpe-trap=zero,overflow,invalid -Wall -W -ffree-form -g -fbounds-check -fbacktrace -fdefault-real-8 -fopenmp -fcheck=all -O0
-FFLAGSCOV=-O2 -fdefault-real-8 -ffree-form -fopenmp -pg --coverage
 FFLAGS=-O2 -fdefault-real-8 -ffree-form -fopenmp
 #add preprocessors:
 CFLAGS=
@@ -28,10 +27,10 @@ all: $(EXECUTABLE)
 test: $(TEST)
 
 $(OBJ_DIR)/%.o: %.F90 | $(OBJ_DIR)
-	$(H5F) $(FFLAGSTEST) $(CFLAGS) -J$(OBJ_DIR) -c $< -o $@
+	$(H5F) $(FFLAGS) $(CFLAGS) -J$(OBJ_DIR) -c $< -o $@
 
 $(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
-	$(H5F) $(FFLAGSTEST) $(CFLAGS) $(LDFLAGS) $? -o $@
+	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
 
 # setup:
 # 	ifndef SETUP_FILE

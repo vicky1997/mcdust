@@ -23,4 +23,4 @@ CFLAGS+=-D EROSION
 CFLAGS+=-D AUXDATA
 
 # to restart a simulation from a previous snapshot
-CFLAGS+=-D RESTART
+#CFLAGS+=-D RESTART

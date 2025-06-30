@@ -50,7 +50,7 @@ program main
 
    ! reading parameters and initializing the simulation
    call get_command_argument(1, ctrl_file)
-   write(*,*) '2DMC v0.1'
+   write(*,*) 'mcdust v1.0'
    write(*,*) '------------------------------------------------------------------'
    write(*,*) 'Reading parameters...'
    call read_parameters(ctrl_file)
@@ -156,7 +156,7 @@ program main
    ! ---- END OF THE MAIN LOOP -----------------------------------------------------------------------------------------
 
    write(*,*) 'time: ', time/year, 'produced output: ',nout
-   open(23,file='timesout.dat',status='unknown',position='append')
+   open(23,file='outputs/timesout.dat',status='unknown',position='append')
    write(23,*) 'time: ', time/year, 'produced output: ',nout
    close(23)
    call update_St(swrm, time)
