@@ -1,8 +1,7 @@
 ! From http://www.fortran-2000.com/rank/
 ! ORDERPACK by: Michel Olagnon
 ! Also from https://github.com/cphyc/Fortran-parallel-sort
-! used for the parallel sort routine
-
+! used for the parallel sort routine in accordance with CC0 v1.0 Universal license 
 module mrgrnk
 
   use types
