@@ -1,14 +1,15 @@
-! This code performes 2D simulation of dust evolution in protoplanetary disk.
-! The gas disk is treated 100% analytically (discstruct module)
+! Authors: Joanna Drążkowska, Vignesh Vaikundaraman, Nerea Gurrutxaga
+! Max Planck Institute for Solar System Research, Göttingen, Germany
+!
+! This code performs a 2D simulation of dust evolution in a protoplanetary disk.
+! The gas disk is an input and is not evolved by mcdust (discstruct module)
 ! The dust is treated as representative particles (RPs) undergoing advection (advection module)
 ! as well as collisions performed with Monte Carlo algorithm (collisions module)
 ! To perform collisions the RPs are binned using an adaptive grid (grid module)
 !
-! citation: Drążkowska, Windmark & Dullemond (2013) A&A 556, A37
+! citations: Drążkowska, Windmark & Dullemond (2013) A&A 556, A37, Vaikundaraman et al. (2025, submitted to JOSS)
 !
-! Author: Joanna Drążkowska, Heidelberg University, ZAH, ITA
-! Albert-Ueberle-Str. 2, 69120 Heidelberg, Germany
-! mailto: asiadrazkowska@gmail.com
+! This code is licensed under the GNU General Public License v3
 !
 program main
    use constants
