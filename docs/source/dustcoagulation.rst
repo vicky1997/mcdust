@@ -67,7 +67,7 @@ And depending on the relative velocities the collisonal outcomes are decided for
 Relative velocities
 -------------------
 The sources for the velocities of the particles taken into account are: Brownian motion, turbulence, radial and azimuthal drift and differential settling.
-This is similar to model followed by Birnstiel et al 2010. For the turbulent relative velocities, we use the prescription from Ormel and Cuzzi 2007.
+This is similar to model followed by `Birnstiel et al 2010 <https://www.aanda.org/articles/aa/full_html/2010/05/aa13731-09/aa13731-09.html>`_ . For the turbulent relative velocities, we use the prescription from `Ormel and Cuzzi 2007 <https://www.aanda.org/articles/aa/abs/2007/17/aa6899-06/aa6899-06.html>`_ .
 The implementation of the relative velocities in :code:`mcdust` can be found in the :code:`relvels` subroutine in :code:`collisions.f90`
 
 Collisional Outcomes
@@ -86,7 +86,7 @@ As a result the mass of the particle :math:`i` becomes
     m_i <= m_i + m_k.
 
 Since the mass of the represenative particle :math:`i` increases, to conserve :math:`M_{\mathrm{swarm}}`, :math:`N_i` reduces.
-This is a statistical effect and it can be balanced out with more collisions in the system. We refer the user to Zsom and Dullemond 2008 for a detailed discussion.
+This is a statistical effect and it can be balanced out with more collisions in the system. We refer the user to `Zsom and Dullemond 2008 <https://www.aanda.org/articles/aa/abs/2008/38/aa09921-08/aa09921-08.html>`_ for a detailed discussion.
 
 Fragmentation & Erosion
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -101,13 +101,13 @@ For both the cases, there are a distribution of fragments as a result and this d
 
     n(m)dm \propto m^\gamma dm,
 
-where :math:`\gamma = - \frac{11}{6}` is a parameter arrived from collisional models such as Dohanyi 1969.
+where :math:`\gamma = - \frac{11}{6}` is a parameter arrived from collisional models such as `Dohanyi 1969 <https://ui.adsabs.harvard.edu/abs/1969JGR....74.2531D/abstract>`_ .
 
 In the case of a full fragmentation, the largest mass of the fragment is the mass of the largest collider and in the case of erosion, the largest fragment has the mass of the smallest collider.
 
 Collision Optimization
 ++++++++++++++++++++++
-Zsom & Dullemond 2008 introduced a fine-tuning parameter, denoted as :math:`dm_{\rm{max}}`, into the algorithm to group collisions and thereby
+`Zsom and Dullemond 2008 <https://www.aanda.org/articles/aa/abs/2008/38/aa09921-08/aa09921-08.html>`_ introduced a fine-tuning parameter, denoted as :math:`dm_{\rm{max}}`, into the algorithm to group collisions and thereby
 accelerate computation. It limits the maximum mass ratio for grouping collisions, and the collision rate :math:`C_{i,j}` is altered as follows,
  
 

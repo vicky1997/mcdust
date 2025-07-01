@@ -2,7 +2,7 @@ Input and Output files
 ============
 Input
 ++++++
-There are two required input files to run a simulation with mcdust, setup.par and prepocs.opt. The details are each file are explained below.
+There are two required input files to run a simulation with mcdust, :code:`setup.par` and :code:`prepocs.opt`. The details are each file are explained below.
 
 Input file 1: :code:`setup.par`
 -----------------------
