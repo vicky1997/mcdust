@@ -15,7 +15,7 @@ The radial advection velocity is given by,
 
 The above equation takes into account radial drift of dust particles due to the differences in dust and gas radial and azimuthal velocities.
 
-The radial diffusion is implemented as a random kick on the particle distributions as in `Ciesla 2010<https://iopscience.iop.org/article/10.1088/0004-637X/723/1/514/meta>`_ and Zsom et al 2011.
+he radial diffusion is implemented as a random kick on the particle distributions as in `Ciesla 2010 <https://iopscience.iop.org/article/10.1088/0004-637X/723/1/514/meta>`_ and `Zsom et al 2011 <https://www.aanda.org/articles/aa/abs/2011/10/aa16515-11/aa16515-11.html>`_ .
 The total diffusion velocity is given by,
 
 .. math:: 

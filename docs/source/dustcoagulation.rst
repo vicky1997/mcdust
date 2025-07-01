@@ -2,7 +2,7 @@ Dust coagulation
 ================
 
 Dust coagulation in :code:`mcdust` is done with a Monte Carlo approach rather than solving the Smoluchowski equation. We briefly explain the method here.
-For details we refer the reader to `Drążkowska et al 2013 <https://www.aanda.org/articles/aa/abs/2013/08/aa21566-13/aa21566-13.html>`_ and `Zsom and Dullemond 2008<https://www.aanda.org/articles/aa/abs/2008/38/aa09921-08/aa09921-08.html>`_ . 
+For details we refer the reader to `Drążkowska et al 2013 <https://www.aanda.org/articles/aa/abs/2013/08/aa21566-13/aa21566-13.html>`_ and `Zsom and Dullemond 2008 <https://www.aanda.org/articles/aa/abs/2008/38/aa09921-08/aa09921-08.html>`_ . 
 We follow representative particles and follow their evolution rather than tracking every single particle and its evolution. These :math:`n` representative particles statistically represent :math:`N` physical particles (:math:`n << N`).
 The representative particle :math:`i` shares identical properties with :math:`N_i` physical particles. 
 The total mass of physical particles in one swarm (:math:`M_{\mathrm{swarm}}`) is given by
