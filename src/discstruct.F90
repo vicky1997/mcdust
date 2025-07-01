@@ -65,7 +65,7 @@ module discstruct
         implicit none
         real, intent(in) :: x,z, time
         real :: Hg
-        real, parameter :: min_exp = 0.0003 ! setting a floor value for the exponent ~ exp(-4**2/2)
+        real, parameter :: min_exp = 0.01 ! setting a floor value for the exponent ~ exp(-4**2/2)
          Hg = cs(x) / omegaK(x) ! gas disk scaleheight
         z_exp = exp(-0.5 * (z / Hg)**2)
         z_exp = max(z_exp, min_exp)
