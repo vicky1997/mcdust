@@ -18,7 +18,7 @@ Collisions
 ++++++++++
 In this framework, we assume that the representative particles themselves do not collide with each other (the collisions between the representative particles are too rare). The representative particles collide with physical (non-representative) particles whose history we do not track. We track only the representative particle and its evolution.
 
-To perform a collision we choose a representative particle :math:`i` and a physical particle which represented by representative particle :math:`k`. The probability of a collision between particle :math:`i` and particle :math:`k` is given by
+To perform a collision we choose a representative particle :math:`i` and a physical particle represented by representative particle :math:`k`. The probability of a collision between particle :math:`i` and particle :math:`k` is given by
 
 .. math:: 
 
@@ -60,22 +60,23 @@ The timestep between the collisions is determined as
 
 where rand is a random number drawn from a uniform distribution between 0 and 1.
 
-The subroutines that compute the collision rates and probabilities can be found in :code:`collisions.f90`
+The subroutines that compute the collision rates and probabilities can be found in :code:`collisions.F90`
 
-And depending on the relative velocities the collisonal outcomes are decided for the particles. We explain the relative velocity formulation and the collisional outcomes below.
+The collisional outcomes between particles (sticking, fragmentation, erosion) is determined by their relative velocities. We explain the relative velocity formulation and the collisional outcomes below.
 
 Relative velocities
 -------------------
 The sources for the velocities of the particles taken into account are: Brownian motion, turbulence, radial and azimuthal drift and differential settling.
-This is similar to model followed by `Birnstiel et al 2010 <https://www.aanda.org/articles/aa/full_html/2010/05/aa13731-09/aa13731-09.html>`_ . For the turbulent relative velocities, we use the prescription from `Ormel and Cuzzi 2007 <https://www.aanda.org/articles/aa/abs/2007/17/aa6899-06/aa6899-06.html>`_ .
-The implementation of the relative velocities in :code:`mcdust` can be found in the :code:`relvels` subroutine in :code:`collisions.f90`
+This is similar to the model described by `Birnstiel et al 2010 <https://www.aanda.org/articles/aa/full_html/2010/05/aa13731-09/aa13731-09.html>`_ . For the turbulent relative velocities, we use the prescription from `Ormel and Cuzzi 2007 <https://www.aanda.org/articles/aa/abs/2007/17/aa6899-06/aa6899-06.html>`_ .
+The implementation of the relative velocities in :code:`mcdust` can be found in the :code:`relvels` subroutine in :code:`collisions.F90`
 
 Collisional Outcomes
 --------------------
 In the standard model the collisional outcomes are sticking, fragmentation and erosion. The outcomes are decided based on the relative velocities of the particles.
-If the relative velocities are below a threshold velocity then we perform sticking. This threshold is the fragmentation velocity :math:`v_{\mathrm{frag}}` which is an input parameter for :code:`mcdust`.
-If the relative velocities are above the fragmentation velocity then there are two outcomes erosion and fragmentation depending on the mass ratio of the particles.
-The implementation of collisions can be found in the subroutine :code:`collision` and subroutines therein, in the file :code:`collisions.f90`
+If the relative velocities are below a threshold velocity then we perform sticking. This threshold is the fragmentation velocity :math:`v_{\mathrm{frag}}`, which is an input parameter for :code:`mcdust`.
+If the relative velocities are above the fragmentation velocity then there are two outcomes, erosion and fragmentation, depending on the mass ratio of the particles.
+The implementation of collisions can be found in the subroutine :code:`collision` and subroutines therein, in the file :code:`collisions.F90`
+
 Sticking
 ^^^^^^^^
 In the case of sticking, we assume the physical particle :math:`k` has been completely merged into the representative particle :math:`i`.
@@ -83,27 +84,27 @@ As a result the mass of the particle :math:`i` becomes
 
 .. math:: 
 
-    m_i <= m_i + m_k.
+    m_i = m_i + m_k.
 
 Since the mass of the represenative particle :math:`i` increases, to conserve :math:`M_{\mathrm{swarm}}`, :math:`N_i` reduces.
 This is a statistical effect and it can be balanced out with more collisions in the system. We refer the user to `Zsom and Dullemond 2008 <https://www.aanda.org/articles/aa/abs/2008/38/aa09921-08/aa09921-08.html>`_ for a detailed discussion.
 
 Fragmentation & Erosion
 ^^^^^^^^^^^^^^^^^^^^^^^
-When the collision exceeds the fragmentation velocity it fragments. But there are two ways depending on the mass ratio between the particles. If two similar sized particles collide,
+When the collision exceeds the fragmentation velocity the representative particle fragments. But there are two ways depending on the mass ratio between the particles. If two similar sized particles collide,
 then this leads to a catastrophic fragmentation of both the particles which we term as fragmentation. But when a small particle collides with a larger particle, a catastrophic fragmentation is unlikely and
-the likely event is that the small particle chips of a piece of the large particle. We term such an event as erosion. The threshold for the mass ratio between the particles can be set with the :code:`erosion_mass_ratio` parameter in the :code:`setup.par` file.
-The default value is set to 10. We assume that in the case of erosion that mass excavated by the small particle is equal to the small particle. 
+the likely event is that the small particle fragments and chips off a piece of the large particle. We term such an event as erosion. The threshold for the mass ratio between the particles can be set with the :code:`erosion_mass_ratio` parameter in the :code:`setup.par` file.
+The default value is set to 10. We assume that the eroded mass is equal to the mass of the small particle.
 
-For both the cases, there are a distribution of fragments as a result and this distribution can be given by,
+For both the cases, there is a distribution of fragments as a result and this distribution is given by,
 
 .. math:: 
 
     n(m)dm \propto m^\gamma dm,
 
-where :math:`\gamma = - \frac{11}{6}` is a parameter arrived from collisional models such as `Dohanyi 1969 <https://ui.adsabs.harvard.edu/abs/1969JGR....74.2531D/abstract>`_ .
+where :math:`\gamma = - \frac{11}{6}` is a parameter derived from collisional models such as `Dohanyi 1969 <https://ui.adsabs.harvard.edu/abs/1969JGR....74.2531D/abstract>`_ .
 
-In the case of a full fragmentation, the largest mass of the fragment is the mass of the largest collider and in the case of erosion, the largest fragment has the mass of the smallest collider.
+In the case of catastrophic fragmentation, the largest mass of the fragment is the mass of the largest collider and in the case of erosion, the largest fragment has the mass of the smallest collider.
 
 Collision Optimization
 ++++++++++++++++++++++
@@ -152,10 +153,10 @@ Moreover, we constrain :math:`dm_{\rm{max}}` such that it does not introduce an 
 
 Adaptive Grid
 +++++++++++++
-Collisions happen between particles that are close proximity within each other and in order to resolve the physics properly in both high density and low density regions, we use an adaptive grid method to bin the partciles.
+Collisions happen between particles that are in close proximity to each other and, in order to resolve the physics properly in both high density and low density regions, we use an adaptive grid method to bin the particles.
 The method works in such a way that each cell has the same number of particles which can be set by the parameter :code:`number_of_particles_per_cell` in the :code:`setup.par` file. 
 
 
-We show a schematic reprentation of the adaptive grid method below,
+We show a schematic reprentation of the adaptive grid method below:
 
 .. image:: images/adaptivegrid.png
