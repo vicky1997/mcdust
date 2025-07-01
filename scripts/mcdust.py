@@ -71,7 +71,7 @@ class Swarm:
                 swarmlist = dset[...]
                 timesout = dset1[...]
                 f.close()
-            self.idnr[iout,:] = np.array(swarmlist['id number'])
+            self.idnr[iout,:] = np.array(int(swarmlist['id number']))
             self.mass[iout,:] = np.array(swarmlist['mass of a particle [g]'])
             self.rdis[iout,:] = np.array(swarmlist['cylindrical radius [AU]'])
             self.zdis[iout,:] = np.array(swarmlist['height above midplane [AU]'])

@@ -148,7 +148,6 @@ program main
       !$OMP END PARALLEL DO
 
       write(*,*) '    collisions done!'
-    
 
       time = time + resdt
 

@@ -65,8 +65,7 @@ module advection
          endif
 #endif
       enddo
-
-      return
+      
    end subroutine mc_advection
 
    ! the maximum radial drift speed due to the gas pressure gradient

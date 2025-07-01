@@ -6,7 +6,7 @@ module discstruct
     implicit none
 
     private
-    public   :: alpha, cs, omegaK, sigmag, densg, Pg, vgas, ddensgdz, ddensgdr, gasmass, dlogPg, diffcoefgas
+    public   :: alpha, cs, omegaK, sigmag, densg, Pg, vgas, ddensgdz, ddensgdr, gasmass, dlogPg, diffcoefgas, z_exp 
 
     real, parameter             :: q       = 0.5                        ! T propto r^-q
     real, parameter             :: p       = 1.                         ! gas surface density propto r^-p
@@ -60,6 +60,19 @@ module discstruct
     end function
 
     
+    !calculate the exponential in density
+    real function z_exp(x,z, time)
+        implicit none
+        real, intent(in) :: x,z, time
+        real :: Hg
+        real, parameter :: min_exp = 0.0003 ! setting a floor value for the exponent ~ exp(-4**2/2)
+         Hg = cs(x) / omegaK(x) ! gas disk scaleheight
+        z_exp = exp(-0.5 * (z / Hg)**2)
+        z_exp = max(z_exp, min_exp)
+        return
+    end function
+
+    
     ! gas volume density
     real function densg(x,z, time)
         use constants, only: pi
@@ -69,8 +82,8 @@ module discstruct
         real, intent(in)  :: time
 
         Hg = cs(x) / omegaK(x) ! gas disk scaleheight
-        densg = (sigmag(x, time) / (sqrt(2.*pi) * Hg)) * exp(-0.5 * (z / Hg)**2)
-
+        densg = (sigmag(x, time) / (sqrt(2.*pi) * Hg)) * z_exp(x,z,time)
+        !densg = max(densg, 1.e-20)
         return
     end function
 
