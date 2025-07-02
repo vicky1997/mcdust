@@ -5,7 +5,7 @@ module timestep
 
    use grid,       only: g
    use types,      only: swarm, list_of_swarms
-
+   use constants,  only: AU
    private
    public      :: time_step
 
@@ -28,7 +28,7 @@ module timestep
         do j = 1, size(ncolls(:,:),dim=2)
           final_dtime = min(final_dtime, c1*size(bin(i,j)%p) * old_dt / real(max(1,ncolls(i,j)))) !we don't want more collisions than ~ nr of particles in a zone per timestep
 #ifdef VERSETTLING
-          final_dtime = min(final_dtime, c2*g%dz(i,j)/maxval(abs(bin(i,j)%p(:)%velz))) ! don't let particles jump over cells in z
+          final_dtime = min(final_dtime, min(AU,c2*g%dz(i,j)/maxval(abs(bin(i,j)%p(:)%velz)))) ! don't let particles jump over cells in z
 #endif
 #ifdef RADRIFT
           final_dtime = min(final_dtime, c2*g%dr(i)/maxval(abs(bin(i,j)%p(:)%velr))) ! don't let particles jump over cells in r

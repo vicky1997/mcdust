@@ -126,8 +126,8 @@ module discstruct
         real              :: Hg
 
         Hg = cs(x) / omegaK(x)
-        ddensgdz = -z * sigmag(x, time) * exp(-0.5 * (z / Hg)**2) / (sqrt(2.*pi) * Hg**3)
-
+        !ddensgdz = -z * sigmag(x, time) * exp(-0.5 * (z / Hg)**2) / (sqrt(2.*pi) * Hg**3)
+        ddensgdz = -z * densg(x,z,time)/ Hg**2
         return
     end function
 
@@ -137,7 +137,7 @@ module discstruct
         real, intent(in)  :: x, z, time
         real              :: dr
 
-        dr = 0.01 * x
+        dr = 0.000001 * x
         ddensgdr = ( densg(x+dr,z, time) - densg(x-dr,z, time) ) / (2. * dr)
 
         return

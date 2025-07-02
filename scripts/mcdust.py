@@ -253,7 +253,7 @@ class Simulation:
 #Plotting routines
 
 class Plots:
-    def rz_scatter(swarms, time=-1, scatter=np.zeros(100), step=1, cmap = 'viridis', cbarlabel='') :
+    def rz_scatter(swarms, time=-1, scatter=None, step=1, cmap = 'viridis', cbarlabel='') :
         """Function to produce a scatter plot optionally with a quantity to be shown
            with color.
 
@@ -279,8 +279,9 @@ class Plots:
             cbar.ax.set_ylabel(cbarlabel)
             ax.set_xscale('log')
         ax.set_xlabel('distance from central star [au]')
-        ax.set_ylabel('height above midplane [au]')
+        ax.set_ylabel('vertical height [au]')
         ax.set_title('Time = %d yrs'%(swarms.snapt[it])) 
+        
     def scatter_all(swarms, time=-1, step=1) :
         """Function to produce scatter plots for Stokes Number, mass,
            grain size, material density.
@@ -310,31 +311,7 @@ class Plots:
         axd["C"].set_ylabel('z [au]')
         plt.suptitle('Time = %d yrs'%(swarms.snapt[it]))
         plt.tight_layout()
-    def radial_scatter_all(swarms, time=-1, step=1) :
-        """Function to produce radial scatter plots for Stokes Number
-           Mass and grain size.
-
-        Args:
-            swarms (Swarms): Object to store swarm data
-            time (int, optional): Time of the simulation. Defaults to -1.
-            step (int, optional): Plot every nth element. Defaults to 1.
-        """        
-        if(time==-1):
-            time = swarms.snapt[-1]
-        it = swarms.snapt.searchsorted(time)
-        ylabel = ['Stokes Number','Mass [g]', 'grain size [cm]']
-        scatter = [swarms.St, swarms.mass, swarms.grain_size]
-        layout = """ABC"""
-        f,axd = plt.subplot_mosaic(layout,figsize=((9,3)))
-        ax = [axd["A"],  axd["B"], axd["C"],]
-        for axs,yl,scat in zip(ax,ylabel,scatter):
-            axs.scatter(swarms.rdis[it,0::step], scat[it,0::step])
-            axs.set_ylabel(yl)
-            axs.set_xlabel('distance from star [au]')
-            axs.set_xscale('log')
-            axs.set_yscale('log')
-        plt.suptitle('Time = %d yrs'%(swarms.snapt[it]))
-        plt.tight_layout()
+        
     def sigma_d(swarms,pars,disk,time=-1):
         """Function to produce plot of dust surface density vs radius
 
@@ -343,11 +320,7 @@ class Plots:
             pars (Params): object containing the parameters of the simulation
             disk (Diskbuild): object containing the static disk model
             time (int, optional): time of the simulation. Defaults to -1.
-        """        
-        #rbins = 100
-        #rwalls = np.linspace(0.99*pars.minr,pars.maxr+0.1, rbins)*au
-        #rcents = 0.5*(rwalls[1:]+rwalls[:-1])
-        #drdis = rwalls[1:]-rwalls[:-1]
+        """         
         if(time==-1):
             time = swarms.snapt[-1]
         it = swarms.snapt.searchsorted(time)
@@ -360,6 +333,7 @@ class Plots:
         ax.set_xlabel('r [au]',fontsize='x-large')
         ax.set_ylabel('$\Sigma_d$',fontsize='x-large')
         plt.show()
+        
     def mass_dens_radial(swarms,pars,time=-1,nmbins=32,rbins=32,show_hist=False):
         """Function to produce density plots of mass vs radius
 
@@ -396,6 +370,7 @@ class Plots:
         ax.set_title('t = {:.1f} yr'.format(swarms.snapt[it]))
         if(show_hist==True):
             plt.show()
+        plt.close()
         f,ax=plt.subplots(figsize=(width/1.5, width/2.), dpi=200)
         ax.set_ylim(np.min(swarms.mass),np.max(swarms.mass)+5)
         ax.set_xlim(0.99,101.)
@@ -403,17 +378,16 @@ class Plots:
         ax.set_yscale("log")
         ax.set_ylabel("particle mass [g]")
         ax.set_xlabel("distance from star [au]")
-
+        mdens1[mdens1 == 0] = 1.e-14
         sigMax = 3.
         sigMin = -7.
         levels = np.arange(sigMin, sigMax, 1)
         pcf = ax.contourf(rlogcents/au, mcents, np.log10(mdens1.T), levels=levels, extend="both", cmap="magma_r")
         cbar = plt.colorbar(pcf, ax=ax)
-        cbar.ax.set_ylabel(r"$\log\ \Sigma_\mathrm{d}$ [g/cm²]")
+        cbar.ax.set_ylabel(r"$\log\ \sigma_\mathrm{d}(\mathrm{m,a})$ [g/cm²]")
         ax.set_title('t = {:.1f} yr'.format(swarms.snapt[it]))
         ax.tick_params(width=1.,which='both')
         plt.show()
         
         
 
-#todo : write routine to make video

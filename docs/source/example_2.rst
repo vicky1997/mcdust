@@ -1,2 +1,2 @@
-Example 2: Tracking composition
+Example 1: Tracking histories
 ====================

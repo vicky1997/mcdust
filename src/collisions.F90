@@ -3,7 +3,7 @@
 ! in the matrices: first index -> representative particle, 2nd -> physical
 module collisions
 
-   use constants,  only: pi, third, mH2, AH2
+   use constants,  only: pi, third, mH2, AH2, AU
    use discstruct, only: cs, omegaK, densg, Pg, vgas, alpha
    use grid,       only: g
    use initproblem,only: m0, mswarm
@@ -279,11 +279,19 @@ module collisions
       ! basic eq. (see e.g. Drazkowska et al 2013, Eqs 19-20)
       colrates(nl,:) = swarms(:)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
       ! adaptative dmmax
+      !where(swarms(:)%mass/swarms(nl)%mass < dmmax)
+      !   accelncol(nl,:) = max(colrates(nl,:)*min(deltar/abs(swarms(nl)%velr),deltaz/abs(swarms(nl)%velz)), 1.)
+      !elsewhere
+      !   accelncol(nl,:) = 1. 
+      !endwhere
+
       where(swarms(:)%mass/swarms(nl)%mass < dmmax)
          accelncol(nl,:) = max(colrates(nl,:)*min(deltar/abs(swarms(nl)%velr),deltaz/abs(swarms(nl)%velz)), 1.)
+         accelncol(nl,:) = min(accelncol(nl,:), swarms(nl)%mass*dmmax/swarms(:)%mass)
       elsewhere
-         accelncol(nl,:) = 1. 
+         accelncol(nl,:) = 1.
       endwhere
+      
       colrates(nl,:) = colrates(nl,:) / accelncol(nl,:)
       ! if the representative particle represents less than 1 particle, the method is not valid anymore,
       ! so the collision rate is supressed
@@ -307,11 +315,19 @@ module collisions
       colrates(:,nl) = swarms(nl)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
       
       ! adaptative dmmax
+      !where(swarms(nl)%mass/swarms(:)%mass < dmmax)
+      !   accelncol(:,nl) = max(colrates(:,nl) * min(deltar/abs(swarms(:)%velr),deltaz/abs(swarms(:)%velz)), 1.)
+      !elsewhere
+      !   accelncol(:,nl) = 1. 
+      !endwhere
+
       where(swarms(nl)%mass/swarms(:)%mass < dmmax)
          accelncol(:,nl) = max(colrates(:,nl) * min(deltar/abs(swarms(:)%velr),deltaz/abs(swarms(:)%velz)), 1.)
+         accelncol(:,nl) = min(accelncol(:,nl), swarms(:)%mass * dmmax / swarms(nl)%mass)
       elsewhere
-         accelncol(:,nl) = 1. 
+         accelncol(:,nl) = 1.
       endwhere
+
       colrates(:,nl) = colrates(:,nl) / accelncol(:,nl)
       where(swarms(:)%npar <= 1.0) colrates(:,nl) = 0.0
 
@@ -416,6 +432,11 @@ module collisions
       swarms(nri)%npar = mswarm / swarms(nri)%mass
       swarms(nri)%coll_f =  1
       return
+      if(swarms(nri)%mass < 0.) then
+         write(*,*) 'negative mass', swarms(nri)%mass, 'in id', &
+            swarms(nri)%idnr, swarms(nri)%zdis/AU, swarms(nri)%rdis/AU
+         stop
+      endif
    end subroutine collision
 
    ! sticking collision

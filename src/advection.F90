@@ -4,7 +4,7 @@
 ! grid to perform advection
 module advection
 
-   use constants,  only: pi, AU, third, AH2, mH2
+   use constants,  only: pi, AU, third, AH2, mH2, year
    use discstruct, only: Pg, densg, omegaK, cs, diffcoefgas, vgas, ddensgdr, ddensgdz, alpha
    use types,      only: swarm
    use parameters, only: matdens, smallr, con2
@@ -66,6 +66,7 @@ module advection
 #endif
       enddo
       
+
    end subroutine mc_advection
 
    ! the maximum radial drift speed due to the gas pressure gradient
@@ -102,8 +103,6 @@ module advection
       vD2 = (diffcoefgas(particle%rdis) / (1. + particle%stnr**2) / densg(particle%rdis,particle%zdis, realtime)) * &
          ddensgdz(particle%rdis,particle%zdis, realtime)
       velv = - vs + vD1 + vD2
-
-      return
    end subroutine vel_ver
 #endif
 
@@ -156,11 +155,10 @@ module advection
       real, dimension(size(swrm))                     :: velv
 
       where (swrm(:)%rdis > smallr) swrm(:)%zdis = swrm(:)%zdis + velv(:) * dtime
-
       return
    end subroutine vertical_settling
 #else
-    ! vertical redistribution of particles to a theoretical Gausian profile
+    ! vertical redistribution of particles to a theoretical Gaussian profile
    subroutine vertical_redistr(particle, realtime)
       implicit none
       type(swarm)                                     :: particle
@@ -199,7 +197,12 @@ module advection
       else                 ! Epstein regime
          stokesnr = rad * matdens / (sqrt(8./pi) * css * gasdens) * omegaK(particle%rdis)
       endif
-
+      if(isnan(stokesnr)) then
+         write(*,*)'in St w id',particle%idnr,'r',particle%rdis/AU,'z', particle%zdis/AU,'mass', particle%mass
+         write(*,*)'dens', gasdens, 'omegaK', omegaK(particle%rdis),'size', rad,  'cs', css, 'con2', con2
+         write(*,*)'npar', particle%npar
+         stop
+      endif 
       return
    end function stokesnr
 
@@ -212,7 +215,6 @@ module advection
 
       vs =particle%zdis * omegaK(particle%rdis) * particle%stnr / (1. + particle%stnr**2.)
       particle%velz = vs
-
       return
    end subroutine vel_vs
 #endif

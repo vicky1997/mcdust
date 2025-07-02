@@ -18,8 +18,7 @@
     codesetup
     dustdynamics
     dustcoagulation
-    dataviz
-    example_1
+    notebooks/mcdust_example.ipynb
     example_2
     example_3
     citation
