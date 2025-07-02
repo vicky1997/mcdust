@@ -1,2 +1,2 @@
-Example 1: Tracking histories
-====================
+Example 3: Adding dust growth outcomes
+===========================

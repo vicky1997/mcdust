@@ -7,3 +7,4 @@
 default
 outputs/default1/
 slurm_jobsubmit.sh
+docs/source/notebooks/.ipynb_checkpoints
