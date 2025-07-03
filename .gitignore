@@ -9,3 +9,4 @@ outputs/default1/
 slurm_jobsubmit.sh
 docs/source/notebooks/.ipynb_checkpoints
 test1
+.DS_Store
