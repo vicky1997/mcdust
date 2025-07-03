@@ -12,7 +12,7 @@ module initproblem
    private
    public   :: init_swarms, init_random_seed, mswarm, m0, nord, nmonom0
    
-   real            :: mswarm, m0, nord, nmonom0
+   real     :: mswarm, m0, nord, nmonom0
    
    contains
    
