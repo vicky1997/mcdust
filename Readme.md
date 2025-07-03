@@ -26,9 +26,22 @@ To run the unit tests:
 `make test SETUP_FILE=tests`
 ## To run the code: 
 
-export OMP_NUM_THREADS=number_of_CPUs
+`export OMP_NUM_THREADS=number_of_CPUs`
 
-./default /setups/default/setup.par
+`./default /setups/default/setup.par`
+
+To clear the run
+
+`make clean SETUP_FILE=default`
+
+## Unit tests
+To run the unit tests in `unit_tests/testsuite.F90`
+
+`make test SETUP_FILE=tests`
+
+To clear the run
+
+`make cleantest SETUP_FILE=tests`
 
 For more details: [mcdust Documentation](https://mcdust.readthedocs.io/en/latest/)
 

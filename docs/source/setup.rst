@@ -25,6 +25,8 @@ First run
     :code:`export OMP_NUM_THREADS=$OMP_NUM_THREADS`
 #. Run the code
     | :code:`./default /setups/default/setup.par`
+#. To clear and start afresh
+    :code:`make clean SETUP_FILE=default`
 
 Restart
 +++++++
@@ -37,3 +39,10 @@ To (re)start the simulation from a specific snapshot, follow the steps.
     :code:`mv foo.h5 restart.h5`
 #. Set the :code:`restart` condition in the :code:`setup.par` file to :code:`.true.`
 
+Unit tests
+++++++++++
+
+#. To run the unit tests module which is in :code:`unit_tests/testsuite.F90`
+    :code:`make test SETUP_FILE=tests`
+#. To clear the run
+    :code:`make cleantest SETUP_FILE=tests`
