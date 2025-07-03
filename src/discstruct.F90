@@ -83,7 +83,6 @@ module discstruct
 
         Hg = cs(x) / omegaK(x) ! gas disk scaleheight
         densg = (sigmag(x, time) / (sqrt(2.*pi) * Hg)) * z_exp(x,z,time)
-        !densg = max(densg, 1.e-20)
         return
     end function
 
@@ -120,13 +119,11 @@ module discstruct
 
     ! partial derivative of gas density with respect to vertical height
     real function ddensgdz(x,z, time)
-        use constants, only: pi
         implicit none
         real, intent(in)  :: x, z, time
         real              :: Hg
 
         Hg = cs(x) / omegaK(x)
-        !ddensgdz = -z * sigmag(x, time) * exp(-0.5 * (z / Hg)**2) / (sqrt(2.*pi) * Hg**3)
         ddensgdz = -z * densg(x,z,time)/ Hg**2
         return
     end function

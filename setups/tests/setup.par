@@ -1,6 +1,6 @@
 number_of_particles_per_cell              256
-number_of_radial_zones                    20
-number_of_vertical_zones                  10
+number_of_radial_zones                    1
+number_of_vertical_zones                  1
 steps_between_outputs                     10000
 time_between_outputs_[yrs]                250.
 maximum_time_of_simulation_[yrs]          10000.

@@ -85,7 +85,7 @@ module collisions
 
       ! calculates initial Stokes number for particles and their settling and radial drift velocities
       do i = 1, nsws
-         call stokes_nr_centr(nr, i, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
+         call stokes_nr_centr(i, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
          call vel_vs_centr(nr, ni, i, stokesnr, Kepler_freq, vs)
 #ifdef RADRIFT
          call vel_rd_centr(nr, i, stokesnr, vr, vn, realtime)
@@ -94,7 +94,7 @@ module collisions
 
       ! calculates relative velocities and collision rates matrix
       do i = 1, nsws
-         call rel_vels(nr, i, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq, cs_speed)
+         call rel_vels(i, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq, cs_speed)
          call col_rates(i, swarms, relvels, colrates, accelncol, g%vol(nr,ni), deltar, deltaz)
       enddo
 
@@ -118,12 +118,12 @@ module collisions
          local_time = local_time + dt      ! update of the local time
          call choose_swarms(nri,nrk,colrates,colri,totr)
          call collision(nri,nrk,swarms,relvels, accelncol)
-         call stokes_nr_centr(nr, nri, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
+         call stokes_nr_centr(nri, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
          call vel_vs_centr(nr, ni, nri, stokesnr, Kepler_freq, vs)
 #ifdef RADRIFT
          call vel_rd_centr(nr, nri, stokesnr, vr, vn, realtime)
 #endif
-         call rel_vels(nr, nri, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq,cs_speed)
+         call rel_vels(nri, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq,cs_speed)
          relvels(:,nri) = relvels(nri,:)
          colri(:) = colri(:) - colrates(:,nri)
          call col_rates(nri, swarms, relvels, colrates, accelncol, g%vol(nr,ni), deltar, deltaz)
@@ -154,10 +154,9 @@ module collisions
    end subroutine mc_collisions
 
    ! calculating Stokes numbers of particle "i" IN THE CENTER OF CELL nr,ni
-   subroutine stokes_nr_centr(nr, i, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
+   subroutine stokes_nr_centr(i, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
       implicit none
       type(swarm), dimension(:)                       :: swarms
-      integer, intent(in)                             :: nr
       integer, intent(in)                             :: i
       real, dimension(:), allocatable                 :: stokesnr
       real, intent(in)                                :: lmfp, gasdens, Kepler_freq, cs_speed
@@ -181,10 +180,9 @@ module collisions
    ! radial drift vr
    ! vertical settling vs
    ! azimuthal drift vtan
-   subroutine rel_vels(nr, nl, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq, cs_speed)
+   subroutine rel_vels(nl, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq, cs_speed)
       implicit none
       type(swarm), dimension(:), pointer              :: swarms
-      integer, intent(in)                             :: nr
       integer, intent(in)                             :: nl
       real, dimension(:,:), allocatable               :: relvels
       real, dimension(:), allocatable                 :: stokesnr, vr, vs
@@ -278,13 +276,8 @@ module collisions
 
       ! basic eq. (see e.g. Drazkowska et al 2013, Eqs 19-20)
       colrates(nl,:) = swarms(:)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
-      ! adaptative dmmax
-      !where(swarms(:)%mass/swarms(nl)%mass < dmmax)
-      !   accelncol(nl,:) = max(colrates(nl,:)*min(deltar/abs(swarms(nl)%velr),deltaz/abs(swarms(nl)%velz)), 1.)
-      !elsewhere
-      !   accelncol(nl,:) = 1. 
-      !endwhere
-
+      
+      ! adaptive dmmax
       where(swarms(:)%mass/swarms(nl)%mass < dmmax)
          accelncol(nl,:) = max(colrates(nl,:)*min(deltar/abs(swarms(nl)%velr),deltaz/abs(swarms(nl)%velz)), 1.)
          accelncol(nl,:) = min(accelncol(nl,:), swarms(nl)%mass*dmmax/swarms(:)%mass)
@@ -314,13 +307,6 @@ module collisions
 
       colrates(:,nl) = swarms(nl)%npar * relvels(nl,:) * con1 * (swarms(nl)%mass**third + swarms(:)%mass**third)**2./vol
       
-      ! adaptative dmmax
-      !where(swarms(nl)%mass/swarms(:)%mass < dmmax)
-      !   accelncol(:,nl) = max(colrates(:,nl) * min(deltar/abs(swarms(:)%velr),deltaz/abs(swarms(:)%velz)), 1.)
-      !elsewhere
-      !   accelncol(:,nl) = 1. 
-      !endwhere
-
       where(swarms(nl)%mass/swarms(:)%mass < dmmax)
          accelncol(:,nl) = max(colrates(:,nl) * min(deltar/abs(swarms(:)%velr),deltaz/abs(swarms(:)%velz)), 1.)
          accelncol(:,nl) = min(accelncol(:,nl), swarms(:)%mass * dmmax / swarms(nl)%mass)
@@ -333,42 +319,6 @@ module collisions
 
       return
    end subroutine col_rates_r
-
-   ! calculating the number of collisions in the case of collision acceleration
-   ! only in the case when the representative particle is much larger than the physical particle
-   subroutine col_accel(nri, swarms, accelncol)
-      implicit none
-      integer, intent(in)                             :: nri
-      real, dimension(:), pointer                     :: accelncol_c
-      type(swarm), dimension(:), pointer              :: swarms
-      real, allocatable, dimension(:,:), target       :: accelncol
-
-      accelncol_c => accelncol(nri,:)
-
-      accelncol_c(:) = 1.0
-      where ((swarms(:)%mass / swarms(nri)%mass) < dmmax)
-         accelncol_c(:) = swarms(nri)%mass * dmmax / swarms(:)%mass
-      endwhere
-
-      return
-   end subroutine col_accel
-
-   subroutine col_accel_r(nri, swarms, accelncol)
-      implicit none
-      integer, intent(in)                             :: nri
-      real, dimension(:), pointer                     :: accelncol_r
-      type(swarm), dimension(:), pointer              :: swarms
-      real, allocatable, dimension(:,:), target       :: accelncol
-
-      accelncol_r => accelncol(:,nri)
-
-      accelncol_r(:) = 1.0
-      where ((swarms(nri)%mass / swarms(:)%mass) < dmmax)
-         accelncol_r(:) = swarms(:)%mass * dmmax / swarms(nri)%mass
-      endwhere
-
-      return
-   end subroutine col_accel_r
 
    ! choosing particles to the next collision
    ! nri -> representative
@@ -446,11 +396,6 @@ module collisions
       type(swarm), dimension(:), pointer              :: swarms
       real, dimension(:,:), allocatable               :: accelncol
       
-      !if (accelncol(nri, nrk) > 0.0) then
-      !   swarms(nri)%mass = swarms(nri)%mass + accelncol(nri, nrk) * swarms(nrk)%mass
-      !else
-      !   swarms(nri)%mass = swarms(nri)%mass + swarms(nrk)%mass
-      !endif
       swarms(nri)%mass = swarms(nri)%mass + accelncol(nri, nrk) * swarms(nrk)%mass
       return
    end subroutine hit_and_stick

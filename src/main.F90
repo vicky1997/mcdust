@@ -18,8 +18,8 @@ program main
    use grid,         only: g, make_grid, deallocate_grid
    use initproblem,  only: init_swarms, init_random_seed, m0, mswarm, nord
    use discstruct,   only: cs, omegaK, gasmass
-   use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, restime, minrad0, &
-                           maxrad0, matdens, r0, dtg, db_data, path
+   use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, &
+                           maxrad0, matdens, r0, db_data, path
    use timestep,     only: time_step
    use types
    use hdf5

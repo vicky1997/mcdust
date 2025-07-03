@@ -131,33 +131,6 @@ module advection
 
       return
    end subroutine vel_rad
-
-   ! performs change of the mean rdis of particles because of the radial drift
-   subroutine radial_drift(swrm, velr, dtime)
-      implicit none
-      type(swarm), dimension(:), allocatable, target  :: swrm
-      real, dimension(size(swrm))                     :: velr
-      real, intent(in)                                :: dtime
-
-      where (swrm(:)%rdis > smallr) swrm(:)%rdis = swrm(:)%rdis + velr(:) * dtime   !!!!!! vr < 0 => drift towards the star!!
-      where (swrm(:)%rdis < smallr) swrm(:)%rdis = 0.99 * smallr ! artificially stops the particles right beyond the "evaporation radius"
-
-      return
-   end subroutine radial_drift
-#endif
-
-#ifdef VERSETTLING
-   ! performes vertical advection
-   subroutine vertical_settling(swrm, velv, dtime)
-      implicit none
-      type(swarm), dimension(:), allocatable, target  :: swrm
-      real, intent(in)                                :: dtime
-      real, dimension(size(swrm))                     :: velv
-
-      where (swrm(:)%rdis > smallr) swrm(:)%zdis = swrm(:)%zdis + velv(:) * dtime
-      return
-   end subroutine vertical_settling
-#else
     ! vertical redistribution of particles to a theoretical Gaussian profile
    subroutine vertical_redistr(particle, realtime)
       implicit none

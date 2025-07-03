@@ -134,7 +134,7 @@ module grid
       integer, dimension(:), allocatable  :: nzzone_arr ! nr of representative particles per z zone
       real                    :: minz   ! min z of swarms
       real                    :: maxz   ! max z of swarms
-      integer                 :: i, j
+      integer                 :: i
       real                    :: x      ! random variable
       integer                 :: xi     ! random index
       integer                 :: i_last ! position of particle right before last grid nz
@@ -269,34 +269,6 @@ module grid
 
       return
    end subroutine shell_sort_r
-
-
-   subroutine sort_swrm_r(lista)
-      implicit none
-      type(swarm), dimension(:), allocatable :: lista
-      real                                   :: temp
-      type(swarm)                            :: tempswarm
-      integer                                :: i, j
-
-      ! in this sort method the first element has to be already the smallest
-      i = minloc(lista(:)%rdis, dim=1) ! fortran runtime warning:an array temporary was created
-      tempswarm = lista(i)
-      lista(i) = lista(1)
-      lista(1) = tempswarm
-
-      do i = 2, size(lista)
-         j = i - 1
-         temp = lista(i)%rdis
-         tempswarm = lista(i)
-         do while (j>=1 .and. lista(j)%rdis>temp)
-            lista(j+1) = lista(j)
-            j = j - 1
-         end do
-         lista(j+1) = tempswarm
-      enddo
-
-      return
-   end subroutine sort_swrm_r
 
    ! sorting swrm table by z using insertion sort algorithm
    subroutine sort_swrm_z(lista)

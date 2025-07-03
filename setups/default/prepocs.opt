@@ -2,7 +2,7 @@
 
 
 # to setup a 1D vertical model
-CFLAGS+=-D VERTICALMODEL
+#CFLAGS+=-D VERTICALMODEL
 
 # turn on dust transport
 CFLAGS+=-D TRANSPORT
