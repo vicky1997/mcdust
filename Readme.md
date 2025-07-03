@@ -39,6 +39,8 @@ To run the unit tests in `unit_tests/testsuite.F90`
 
 `make test SETUP_FILE=tests`
 
+`./test1 setups/tests/setup.par`
+
 To clear the run
 
 `make cleantest SETUP_FILE=tests`

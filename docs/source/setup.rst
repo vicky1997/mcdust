@@ -44,5 +44,8 @@ Unit tests
 
 #. To run the unit tests module which is in :code:`unit_tests/testsuite.F90`
     :code:`make test SETUP_FILE=tests`
+    
+    :code:`./test1 setups/tests/setup.par`
+
 #. To clear the run
     :code:`make cleantest SETUP_FILE=tests`
