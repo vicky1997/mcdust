@@ -1,7 +1,7 @@
 F90=gfortran
 H5F=h5fc
-FFLAGS=-ffpe-trap=zero,overflow,invalid -fopenmp -Wall -W -ffree-form -g -fbounds-check -fbacktrace -fdefault-real-8 -fcheck=all -O2
-#FFLAGS=-O2 -fdefault-real-8 -ffree-form -fopenmp
+#FFLAGS=-ffpe-trap=zero,overflow,invalid -fopenmp -Wall -W -ffree-form -g -fbounds-check -fbacktrace -fdefault-real-8 -fcheck=all -O2
+FFLAGS=-O2 -fdefault-real-8 -ffree-form -fopenmp
 
 #add preprocessors:
 CFLAGS=
