@@ -19,7 +19,7 @@ module collisions
    public :: mc_collisions
 
 #ifdef TESTCOLLISIONS
-   public :: col_rates, rel_vels, col_rates_r, vel_vs_centr, vel_rd_centr, col_accel, stokes_nr_centr
+   public :: col_rates, rel_vels, col_rates_r, vel_vs_centr, vel_rd_centr, stokes_nr_centr
 #endif
 
    contains
