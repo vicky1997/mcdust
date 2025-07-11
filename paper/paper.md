@@ -13,7 +13,7 @@ authors:
   - name: Nerea Gurrutxaga
     orcid: 0009-0008-3256-9564
     affiliation: 1
-  - name: Joanna {Dr{\k{a}}{\.z}kowska}
+  - name: Joanna Drążkowska
     orcid: 0000-0002-9128-0305
     affiliation: 1
 affiliations:
