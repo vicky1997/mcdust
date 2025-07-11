@@ -247,14 +247,16 @@ module grid
       implicit none
       type(swarm), dimension(:), allocatable :: swrm
       integer                                :: i, j, increment
-      type(swarm)                            :: tempswarm  ! temp = a(i) = swrm(i)%rdis !
+      type(swarm)                            :: tempswarm
 
       increment = size(swrm) / 2
       do while (increment > 0)
          do i = increment+1, size(swrm)
             j = i
             tempswarm = swrm(j)
-            do while (j >= increment+1 .and. swrm(j-increment)%rdis > tempswarm%rdis)
+            do 
+               if (j < increment+1) exit
+               if (swrm(j-increment)%rdis <= tempswarm%rdis) exit 
                swrm(j) = swrm(j-increment)
                j = j - increment
             enddo

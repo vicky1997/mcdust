@@ -1,18 +1,16 @@
 F90=gfortran
 H5F=h5fc
-#FFLAGS=-ffpe-trap=zero,overflow,invalid -fopenmp -Wall -W -ffree-form -g -fbounds-check -fbacktrace -fdefault-real-8 -fcheck=all -O2
+# uncomment this if you want to debug
+#FFLAGS=-ffpe-trap=zero,overflow,invalid -fopenmp -Wall -W -ffree-form -g -fbounds-check -fbacktrace -fdefault-real-8 -fcheck=all -O0
 FFLAGS=-O2 -fdefault-real-8 -ffree-form -fopenmp
 
 #add preprocessors:
 CFLAGS=
-# setup:
 ifndef SETUP_FILE
 	$(error Specify SETUP_FILE. Example: make SETUP_FILE=default)
- endif
-# setuptest:
-# 	SETUP_FILE=tests
+endif
 
-OPT_FILE ?= setups/$(SETUP_FILE)/prepocs.opt
+OPT_FILE ?= setups/$(SETUP_FILE)/preprocs.opt
 -include $(OPT_FILE)
 
 SRC_DIR=src
@@ -32,17 +30,6 @@ $(OBJ_DIR)/%.o: %.F90 | $(OBJ_DIR)
 
 $(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
 	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
-
-# setup:
-# 	ifndef SETUP_FILE
-# 		$(error Specify SETUP_FILE. Example: make SETUP_FILE=default)
-# 	 endif
-# setuptest:
-# 	SETUP_FILE=tests
-
-#test: 
-#	$(OBJ_DIR)/%.o: %.F90 | $(OBJ_DIR)
-#		$(H5F) $(FFLAGSTEST) $(CFLAGS) -J$(OBJ_DIR) -c $< -o $@
 
 $(TEST): $(OBJ_DIR)/testsuite.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
 	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
