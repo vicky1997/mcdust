@@ -56,7 +56,7 @@ program main
    call read_parameters(ctrl_file)
    write(*,*) '------------------------------------------------------------------'
    write(*,*) 'Initializing representative bodies...'
-   if (restart) then
+#ifdef RESTART
       write(*,*) ' Reading restart...'
       call hdf5_file_read(Ntot, swrm, nout, mswarm, time, resdt)
       write(*,*) time, nout, mswarm
@@ -65,9 +65,9 @@ program main
       mdust = mswarm * real(Ntot)
       m0 = 4. * third * pi * r0**3 * matdens
       nord = (log10(mswarm/m0))
-   else
+#else
       call init_swarms(Ntot,swrm)
-   endif
+#endif
    write(*,*) 'succeed'
 
    write(*,*) 'Initial disk mass: ', gasmass(0.1*AU,maxrad0*AU,0.0)/Msun
@@ -106,25 +106,26 @@ program main
       iter = iter + 1
 
       ! writing max mass value for each timestep for bug fixes
-      if(db_data) then
+#ifdef AUXDATA
          open(123,file=trim(path)//trim('/mmax.dat'),position='append')
          write(123,*) time/year, maxval(swrm(:)%mass)
          close(123)
-      endif
+#endif
 
-
+#ifdef TRANSPORT
       write(*,*) ' Performing advection: timestep',resdt/year,'yrs'
-      if (db_data) then
+#ifdef AUXDATA
          open(23,file=trim(path)//trim('/timestep.dat'),status='unknown',position='append')
          write(23,*) time/year,resdt/year
          close(23)
-      endif
+#endif
 
       ! performing advection
       call mc_advection(swrm, resdt, time)
       write(*,*) '  advection done'
-    
+#endif
 
+#ifdef COLLISIONS
       ! removing old grid and building new one
       call deallocate_grid
       if (allocated(bin))  deallocate(bin)
@@ -148,7 +149,7 @@ program main
       !$OMP END PARALLEL DO
 
       write(*,*) '    collisions done!'
-
+#endif
       time = time + resdt
 
    enddo
