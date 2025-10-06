@@ -19,7 +19,7 @@ CFLAGS+=-D COLLISIONS
 # include erosion
 CFLAGS+=-D EROSION
 
-#write some auxiliary data
+# write some auxiliary data
 CFLAGS+=-D AUXDATA
 
 # to restart a simulation from a previous snapshot
@@ -27,5 +27,5 @@ CFLAGS+=-D RESTART
 
 # only use when you want to run the test subroutine
 CFLAGS+=-D TESTADVECTION
-#test collisions
+# test collisions
 CFLAGS+=-D TESTCOLLISIONS
