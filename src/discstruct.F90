@@ -62,6 +62,9 @@ module discstruct
     
     !calculate the exponential in density
     real function z_exp(x,z, time)
+#ifdef NELSON2013
+        use constants, only: Ggrav
+#endif
         implicit none
         real, intent(in) :: x,z, time
         real :: Hg

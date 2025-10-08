@@ -88,7 +88,6 @@ program main
       enddo
       close(33)
       timeofnextout = timearray(nout+1)
-      stop
 #endif
    write(*,*) 'succeed'
 
