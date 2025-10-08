@@ -12,6 +12,9 @@ module parameters
 #ifdef EROSION
     public :: erosion_mass_ratio
 #endif
+#ifdef LOGTIME
+    public :: tstart, ntimeout
+#endif
     integer                             :: Ntot     ! total number of representative particles in the simulation
     integer                             :: ncell    ! number of particles per cell
     integer                             :: nr       ! nr of radial zones
@@ -39,7 +42,10 @@ module parameters
     character(len=100)                  :: path     ! absolute path of data directory
     real, protected  :: con1  ! optimization
     real, protected  :: con2  ! optimization
-
+#ifdef LOGTIME
+    real                                :: tstart
+    integer                             :: ntimeout
+#endif
     contains
 
     subroutine read_parameters(ctrl_file)
@@ -123,6 +129,16 @@ module parameters
                 case('steps_between_outputs')
                     read(buffer, *, iostat=ios) fout
                     print *, 'Read number of iterations between outputs: ', fout
+#ifdef LOGTIME
+                case('no_of_outputs')
+                    read(buffer, *, iostat=ios) ntimeout
+                    print *, 'Number of outputs: ', ntimeout
+                
+                case('output_start_time_[yr]')
+                    read(buffer, *, iostat=ios) tstart
+                    print *, 'Output start time: ', tstart
+                    tstart = tstart*year
+#endif
                 case('maximum_time_of_simulation_[yrs]')
                     read(buffer, *, iostat=ios) tend
                     print *, 'Read maximum time of simulation: ', tend
@@ -192,6 +208,7 @@ module parameters
         read(2,'(A)') path
         close(2)
         CALL SYSTEM('rm -rf outputs/path.txt')
+
 
         return
     end subroutine read_parameters

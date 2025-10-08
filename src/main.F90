@@ -20,6 +20,10 @@ program main
    use discstruct,   only: cs, omegaK, gasmass
    use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, &
                            maxrad0, matdens, r0, db_data, path
+#ifdef LOGTIME
+   use parameters,   only: read_parameters, Ntot, nz, nr, dtime, fout, tend, smallr, restart, &
+                           maxrad0, matdens, r0, db_data, path, tstart, ntimeout
+#endif
    use timestep,     only: time_step
    use types
    use hdf5
@@ -37,6 +41,10 @@ program main
 
    integer             :: i, j, iter
    real                :: time = 0.0          ! physical time
+#ifdef LOGTIME
+   real, dimension(:),allocatable  :: timearray
+   real                       :: logdt
+#endif
    real                :: timeofnextout = 0.0 ! time of next output
    real                :: resdt = 0.1*year               ! resulting physical time step
    integer             :: nout = 0            ! number of the next output
@@ -68,6 +76,20 @@ program main
 #else
       call init_swarms(Ntot,swrm)
 #endif
+#ifdef LOGTIME
+      allocate(timearray(ntimeout+1))
+      logdt = log(tend/tstart)/ntimeout
+      do i = 1,ntimeout+1
+         timearray(i) = tstart*exp((i-1)*logdt)
+      enddo
+      open(33,file=trim(path)//trim('/timescheck.dat'),status='unknown',position='append')
+      do i = 1,size(timearray)
+         write(33,*) timearray(i)/year
+      enddo
+      close(33)
+      timeofnextout = timearray(nout+1)
+      stop
+#endif
    write(*,*) 'succeed'
 
    write(*,*) 'Initial disk mass: ', gasmass(0.1*AU,maxrad0*AU,0.0)/Msun
@@ -91,6 +113,19 @@ program main
          call time_step(bin, ncolls, timeofnextout-time, resdt)
       end if
 
+#ifdef LOGTIME
+      if(time>=timeofnextout) then
+         call update_St(swrm, time) ! update Stokes number; it will later be update during advection too
+         call hdf5_file_write(file, swrm, time, nout, mswarm,resdt)
+         write(*,*) 'Time: ', time/year, 'produced output: ',nout
+         open(23,file=trim(path)//trim('/timesout.dat'),status='unknown',position='append')
+         write(23,*) 'time: ', time/year, 'produced output: ',nout
+         close(23)
+         nout = nout + 1
+         timeofnextout = timearray(nout+1)
+      endif
+#else
+
       ! producing output
       if (modulo(iter,fout) == 0 .or. time>=timeofnextout) then
          call update_St(swrm, time) ! update Stokes number; it will later be update during advection too
@@ -102,7 +137,7 @@ program main
          timeofnextout = time+dtime
          nout = nout + 1
       endif
-
+#endif
       iter = iter + 1
 
       ! writing max mass value for each timestep for bug fixes
@@ -165,7 +200,9 @@ program main
    
    deallocate(bin)
    deallocate(rbin)
-
+#ifdef LOGTIME
+   deallocate(timearray)
+#endif
    write(*,*) '------------------------------------------------------------------'
    write(*,*) 'tend exceeded, finishing simulation...'
 

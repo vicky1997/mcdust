@@ -40,7 +40,7 @@ module discstruct
         use constants, only: Ggrav, Msun
         implicit none
         real, intent(in)  :: x
-
+        
         omegaK = sqrt(Ggrav * Msun / x**3)
 
         return
@@ -66,8 +66,12 @@ module discstruct
         real, intent(in) :: x,z, time
         real :: Hg
         real, parameter :: min_exp = 0.01 ! setting a floor value for the exponent ~ exp(-4**2/2)
-         Hg = cs(x) / omegaK(x) ! gas disk scaleheight
-        z_exp = exp(-0.5 * (z / Hg)**2)
+        Hg = cs(x) / omegaK(x) ! gas disk scaleheight
+#ifdef NELSON2013
+        z_exp = exp((Ggrav*Msun/(cs(x)**2.)) * (1/sqrt(x**2. + z**2.) - 1./x))
+#else
+        z_exp = exp(-0.5 * (z / Hg)**2.)
+#endif
         z_exp = max(z_exp, min_exp)
         return
     end function

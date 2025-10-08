@@ -23,9 +23,14 @@ CFLAGS+=-D EROSION
 CFLAGS+=-D AUXDATA
 
 # to restart a simulation from a previous snapshot
-CFLAGS+=-D RESTART
+#CFLAGS+=-D RESTART
+
+# to have a logarthmic output of your results
+
+#CFLAGS +=-D LOGTIME
+
 
 # only use when you want to run the test subroutine
-CFLAGS+=-D TESTADVECTION
+#CFLAGS+=-D TESTADVECTION
 # test collisions
-CFLAGS+=-D TESTCOLLISIONS
+#CFLAGS+=-D TESTCOLLISIONS

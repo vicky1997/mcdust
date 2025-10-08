@@ -3,7 +3,7 @@ number_of_radial_zones                    32
 number_of_vertical_zones                  16
 steps_between_outputs                     10000
 time_between_outputs_[yrs]                250.
-maximum_time_of_simulation_[yrs]          10000.
+maximum_time_of_simulation_[yrs]          1000.
 minimum_radius_[AU]                       1.
 maximum_radius_[AU]                       100.00
 monomer_radius_[cm]                       1.e-4
@@ -15,5 +15,5 @@ fragmentation_velocity_[cm/s]             1000.
 alpha                                     1.e-3
 sigma_gas_[g/cm2]                         800.
 temperature_[K]                           280.
-erosion_mass_ratio                        10.
-data_directory                            "data"
+erosion_mass_ratio                        10
+data_directory                            "test"
