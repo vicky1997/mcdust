@@ -23,7 +23,7 @@ CFLAGS+=-D EROSION
 CFLAGS+=-D AUXDATA
 
 # to restart a simulation from a previous snapshot
-CFLAGS+=-D RESTART
+#CFLAGS+=-D RESTART
 
 # only use when you want to run the test subroutine
 CFLAGS+=-D TESTADVECTION

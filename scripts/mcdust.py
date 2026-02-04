@@ -354,7 +354,6 @@ class Plots:
         rlogcents = np.sqrt(rlogwalls[1:]*rlogwalls[:-1])
         drlog = rlogwalls[1:]-rlogwalls[:-1]
         width=7.
-        it=-1
         mdens = np.zeros((pars.ntime,rbins,nmbins))
         mdens1 = np.zeros((rbins,nmbins))
         f,ax = plt.subplots(figsize=(width/2., width/2), dpi=300)
