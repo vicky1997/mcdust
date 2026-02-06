@@ -8,9 +8,12 @@ module parameters
     private
     public :: read_parameters, Ntot, ncell, nr, nz, fout, dtime, tend, smallr, restart, restime, minrad0, maxrad0, &
               r0, matdens, dmmax, eta, dtg, vfrag, con1, con2, db_data, &
-              datadir, path, sigmag0, temperature, alpha_t, nbins
+              datadir, path, sigmag0, temperature, alpha_t
 #ifdef EROSION
     public :: erosion_mass_ratio
+#endif
+#ifdef INITSIZEDIST
+    public :: amax0
 #endif
 #ifdef LOGTIME
     public :: tstart, ntimeout
@@ -31,7 +34,6 @@ module parameters
     real, protected                     :: matdens  ! material density
     real                                :: dmmax    ! MC-acceleration parameter
     real                                :: vfrag    ! fragmentation treshold velocity
-    integer                             :: nbins    ! number of bins for mass histograms
     integer                             :: fout     ! steps between outputs
     real                                :: alpha_t, sigmag0, temperature, eta ! gas disk properties
 #ifdef EROSION
@@ -45,6 +47,10 @@ module parameters
 #ifdef LOGTIME
     real                                :: tstart
     integer                             :: ntimeout
+#endif
+
+#ifdef INITSIZEDIST
+    real                                :: amax0
 #endif
     contains
 
@@ -62,7 +68,7 @@ module parameters
         ! setting default values
         minrad0 = 3.0
         maxrad0 = 5.0
-        r0 = 1.e-2
+        r0 = 1.e-4 
         ncell = 200
         nr   = 10
         nz = 1
@@ -80,13 +86,19 @@ module parameters
         eta = 0.05
         restart = .false.
         restime = 0.0
-        nbins = 200
 #ifdef EROSION
         erosion_mass_ratio = 10
 #endif
+
+#ifdef INITSIZEDIST
+        amax0 = 1.e-4
+#endif
         db_data = .true.
         datadir = "data"
-
+#ifdef LOGTIME
+        ntimeout = 100
+        tstart = 100.
+#endif
         ! reading the parameter file
       open(fh,file=ctrl_file,action='read')
 
@@ -113,6 +125,11 @@ module parameters
                 case ('monomer_radius_[cm]')
                     read(buffer, *, iostat=ios) r0
                     print *, 'Read monomer radius: ', r0
+#ifdef INITSIZEDIST
+                case ('maximum_initial_particle_size_[cm]')
+                    read(buffer, *, iostat=ios) amax0
+                    print *, 'maximum initial particle size [cm]', amax0
+#endif
                 case('number_of_particles_per_cell')
                     read(buffer, *, iostat=ios) ncell
                     print *, 'Read number of particles per cell: ', ncell

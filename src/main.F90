@@ -67,6 +67,9 @@ program main
 #ifdef RESTART
       write(*,*) ' Reading restart...'
       call hdf5_file_read(Ntot, swrm, nout, mswarm, time, resdt)
+      do i = 1,size(swrm)
+         swrm(i)%npar = mswarm/swrm(i)%mass
+      enddo
       write(*,*) time, nout, mswarm
       write(*,*) '  restart read!'
       timeofnextout = time + dtime
@@ -113,7 +116,7 @@ program main
       end if
 
 #ifdef LOGTIME
-      if(time>=timeofnextout) then
+      if(time>=timeofnextout .or. iter==0 ) then
          call update_St(swrm, time) ! update Stokes number; it will later be update during advection too
          call hdf5_file_write(file, swrm, time, nout, mswarm,resdt)
          write(*,*) 'Time: ', time/year, 'produced output: ',nout

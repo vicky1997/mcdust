@@ -404,7 +404,7 @@ module hdf5output
     call h5fopen_f('restart.h5', H5F_ACC_RDONLY_F, this%id, this%error)
     call check_error(this% error, 'error opening the file restart.h5')
 
-    CALL h5aopen_name_f(this%id, 'mass_of_swarm', att1, this%error)
+    CALL h5aopen_name_f(this%id, 'mass_of_swarm[g]', att1, this%error)
     call check_error(this% error, 'error opening the attribute m_swarm')
 
     f_ptr = C_LOC(mswarm)

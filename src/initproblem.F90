@@ -3,10 +3,13 @@ module initproblem
 
    use constants,  only: pi, third, AU
    use discstruct, only: gasmass, cs, omegaK
+#ifdef INITSIZEDIST
+   use parameters, only: dtg, minrad0, maxrad0, r0, matdens, amax0
+#else
    use parameters, only: dtg, minrad0, maxrad0, r0, matdens
+#endif
    use types,      only: swarm
    use advection,  only: stokesnr
-   
    implicit none
    
    private
@@ -26,7 +29,10 @@ module initproblem
       real                                             :: Hg          ! pressure height scale of the gas
       integer                                          :: i
       real, parameter                                  :: s = 0.0   ! to initialize the particles density r slope (for MMSN s = -0.25)
-
+#ifdef INITSIZEDIST
+      real, parameter                                  :: q = - 3.5
+      real                                             :: rad 
+#endif      
       ! total mass of dust =  dust to gas ratio x mass of the gas               
       mdust = dtg * gasmass(minrad0*AU,maxrad0*AU,0.0)
       ! mass of one swarm
@@ -43,7 +49,17 @@ module initproblem
       ! initializing the particles
       do i = 1, Ntot
          swrm(i)%idnr = i
+#ifdef INITSIZEDIST 
+         call random_number(rand)
+         rad = ((amax0**(4+q)-r0**(4+q))*rand(1) + r0**(4+q))**(1/(4+q))
+         swrm(i)%mass = 4*third*matdens*pi*(rad**3)
+         if (swrm(i)%mass > 1.e10) then
+            write(*,*) 'mass error', swrm(i)%mass, rad
+            stop
+         endif
+#else
          swrm(i)%mass = m0 
+#endif
          swrm(i)%npar = mswarm / swrm(i)%mass
          call random_number(rand)
 #ifdef VERTICALMODEL
