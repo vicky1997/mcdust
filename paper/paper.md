@@ -46,7 +46,7 @@ Several codes exist to model dust growth in protoplanetary disks and we focus on
 
 Dust coagulation depends on the local gas properties and therefore we bin particles into grids in order to perform collisions. We make use of an adaptive grid approach where we make sure that each cell has equal number of representative particles. This guarantees that there are always sufficient particles to resolve the physics of collisions. Figure below shows a sketch of our adaptive grid model and the different physical processes simulated by `mcdust`. The details of the physics of the code is explained in @Drazkowska2013. The particle based approach to dust growth has the advantage of being able to track particle histories and add properties/composition that can be tracked with little computational overhead making `mcdust` useful for performing dust coagulation simulations with different properties (e.g.porosity) and compositions for the dust. Including dust growth/dynamics in hydrodynamic simulations of protoplanetary disks can be very expensive and computationally complex. This is where `mcdust ` can also be used to post-process data from hydrodynamic simulations to understand the dynamics and evolution of dust in different conditions without much computational complexity.  
 
-![](Figures/gridnew.png)
+![The overview of the different physical processes in `mcdust` and a representative sketch of the adpative grid method that is used in `mcdust` inorder to group particles and perform collisions.](Figures/gridnew.png)
 
 # Software Design
 
@@ -71,7 +71,7 @@ We compare a run of our code with a run from the open source 1D dust coagulation
 
 We ran a simulation for 10000 years. We show below the dust surface density $\sigma_d$ as a function of particle mass and distance from star at the end of the simulation for both `mcdust` and `dustpy`. 
 
-![](Figures/dustpyvsmcdust.png){width=75%}
+!A comparison of the dust surface densities $\sigma_d$ as a function of particle mass and distance from star between `mcdust` (left) and `dustpy` (right).](Figures/dustpyvsmcdust.png){width=75%}
 
 
 The image above shows the radial distrbution of It is evident that both the codes have similar overall outcomes but they do have certain differences. The most striking one is that `mcdust` does not provide coverage of the regions of parameter space that do not include sufficiently high fraction of the dust mass. This holds true for all Monte Carlo based codes. But with higher resolution simulation this issue can be overcome. The other important factor is that `mcdust` does not face the issue of artificially sped-up growth that `dustpy` and other Smoluchowski equation based codes tend to encounter. And the 2D r-z structure of `mcdust` also helps us to investigate processes like sedimentation driven coagulation  [@Drazkowska2013] that are not usually seen in 1D simulations like `dustpy`. This can be seen in image at around 50 AU where `mcdust` has larger surface densities higher masses when compared to `dustpy`. For a more detailed discussion of the differences between the two approaches to dust growth, i.e., the Monte Carlo method and the Smoluchowski equation approach we point the reader to @Drazkowska2014.
