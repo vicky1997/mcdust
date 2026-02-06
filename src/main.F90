@@ -59,6 +59,9 @@ program main
 #ifdef RESTART
       write(*,*) ' Reading restart...'
       call hdf5_file_read(Ntot, swrm, nout, mswarm, time, resdt)
+      do i=1,size(swrm)
+         swrm(i)%npar = mswarm/swrm(i)%mass
+      enddo
       write(*,*) time, nout, mswarm
       write(*,*) '  restart read!'
       timeofnextout = time + dtime
