@@ -5,7 +5,7 @@ module timestep
 
    use grid,       only: g
    use types,      only: swarm, list_of_swarms
-   use constants,  only: AU
+   use constants,  only: AU, year
    private
    public      :: time_step
 
@@ -22,7 +22,7 @@ module timestep
       integer                                        :: i, j, c1=10, c2=1 !c1,c2 - timestep enlargement factors
 
       old_dt = final_dtime
-      final_dtime = max(1.,dtout)
+      final_dtime = max(0.01*year,dtout)
 
       do i = 1, size(ncolls(:,:),dim=1)
         do j = 1, size(ncolls(:,:),dim=2)
