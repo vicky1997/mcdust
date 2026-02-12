@@ -13,7 +13,7 @@ evaporation_radius_[AU]                   0.99
 dust_to_gas_ratio                         0.01
 fragmentation_velocity_[cm/s]             1000.
 alpha                                     1.e-3
-sigma_gas_[g/cm2]                         800.
+sigma_gas_[g/cm2]                         1000.
 temperature_[K]                           280.
 erosion_mass_ratio                        10.
 data_directory                            "data"
