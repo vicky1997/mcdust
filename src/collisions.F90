@@ -118,9 +118,7 @@ module collisions
          call collision(nri,nrk,swarms,relvels, accelncol)
          call stokes_nr_centr(nri, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
          call vel_vs_centr(nr, ni, nri, stokesnr, Kepler_freq, vs)
-#ifdef RADRIFT
          call vel_rd_centr(nr, nri, stokesnr, vr, vn, realtime)
-#endif
          call rel_vels(nri, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq,cs_speed)
          relvels(:,nri) = relvels(nri,:)
          colri(:) = colri(:) - colrates(:,nri)
@@ -454,7 +452,6 @@ module collisions
       return
    end subroutine vel_vs_centr
 
-#ifdef RADRIFT
    ! velocity of radial drift
    subroutine vel_rd_centr(nr, i, stokesnr, vr, vn, realtime)
       implicit none
@@ -470,6 +467,5 @@ module collisions
 
       return
    end subroutine vel_rd_centr
-#endif
 
 end
