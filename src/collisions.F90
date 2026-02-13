@@ -87,9 +87,7 @@ module collisions
       do i = 1, nsws
          call stokes_nr_centr(i, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
          call vel_vs_centr(nr, ni, i, stokesnr, Kepler_freq, vs)
-#ifdef RADRIFT
          call vel_rd_centr(nr, i, stokesnr, vr, vn, realtime)
-#endif
       enddo
 
       ! calculates relative velocities and collision rates matrix
@@ -254,11 +252,8 @@ module collisions
       vtan(:) = vn * ( 1. /(1.+stokesnr(:)**2.) - 1. / (1.+stokesnr(nl)**2.) )
 
       ! total
-#ifdef RADRIFT
          relvels(nl,:) = sqrt(vB2(:)  + vT2(:) + (vs(:) - vs(nl))**2 + (vr(:) - vr(nl))**2 + vtan(:)**2)
-#else
-         relvels(nl,:) = sqrt(vB2(:) + (vs(:) - vs(nl))**2 + (vr(:) - vr(nl))**2 + vtan(:)**2)
-#endif
+         !relvels(nl,:) = sqrt(vB2(:) + (vs(:) - vs(nl))**2 + (vr(:) - vr(nl))**2 + vtan(:)**2)
 
       return
    end subroutine rel_vels
