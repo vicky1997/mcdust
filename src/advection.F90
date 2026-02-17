@@ -131,6 +131,7 @@ module advection
 
       return
    end subroutine vel_rad
+#endif
     ! vertical redistribution of particles to a theoretical Gaussian profile
    subroutine vertical_redistr(particle, realtime)
       implicit none
@@ -150,7 +151,7 @@ module advection
 
       return
    end subroutine vertical_redistr
-#endif
+
    ! calculates the Stokes numbers of particles locally
    real function stokesnr(particle, realtime)
       implicit none
