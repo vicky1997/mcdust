@@ -28,7 +28,6 @@ This is the file to specify the simulation parameters. The parameters to be ente
 | :code:`temperature_[K]`  - temperature in K at 1 AU                         
 | :code:`erosion_mass_ratio` - mass ratio condition to trigger erosion                     
 | :code:`data_directory` - directory name to write the data  
-| :code:`restart` - to be set to true if we are starting a simulation from a snapshot
 
 
 If the values for the parameters are not specified in the :code:`setup.par` file, the default values will be taken as specified in the :code:`parameters.F90` file. New parameters can also be added to the simulation via the :code:`parameters.F90` file.
@@ -45,6 +44,7 @@ This file specifies the regions of the code to be compiled based on compiler opt
 | :code:`COLLISIONS`: activate dust coagulation
 | :code:`EROSION`: activate erosion as a collision outcome
 | :code:`AUXDATA`: write timestep data
+| :code:`RESTART`: continue a simulation from a snapshot
 
 Comment or uncomment the options with # in the file based on the setup of the run.
 
@@ -64,7 +64,7 @@ Each data file contains the properties of all representative particles (called a
 | Radial velocity v_r of the representative particle in cm/s
 | Vertical velocity v_z of the representative particle in cm/s
 
-Each data file also contains the mass of a swarm (in g) and the output number of the file as metadata.
+Teh data file contains the snapshot time of the data file in the group :code:`\times\` where the snapshot time (in years) is stored in the :code:`timesout` dataset. Each data file also contains the mass of a swarm (in g) and the output number of the file as metadata.
 
 The metadata of the code can be accessed using the :code:`h5dump` command as shown in the example below.
 
@@ -127,3 +127,6 @@ The output of the command shows the metadata of the file :code:`swarms-00000.h5`
     }
 
 To add new properties to the data, one can modify the :code:`hdf5output.F90` file. 
+
+There are also more files that can be written out for auxilliary data. :code:`timesout.dat` contains the snapshot times [in yr] of the output files in plain text format. :code:`timestep.dat` contains the advection timestep [in yr] for each iteration.
+Writing these files can be turned on/off using the :code:`AUXDATA`preprocessor directive in :code:`preprocs.opt` as described in the section Input File 2.

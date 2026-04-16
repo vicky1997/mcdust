@@ -15,16 +15,16 @@ Pre-requisites:
 
 Now one can clone the GitHub repository to use the code.
 
-:code:`git clone git@github.com:vicky1997/mcdust.git`
+:code:`git clone https://github.com/vicky1997/mcdust.git`
 
 First run
 +++++++++
-#. Make the :code:`/setups/default` setup 
+#. Make the :code:`/setups/default` setup. The `make` should be run in the main `mcdust` directory.
     :code:`make SETUP_FILE=default`
 #. Set the number of threads for OpenMP parallelisation.
     :code:`export OMP_NUM_THREADS=$OMP_NUM_THREADS`
 #. Run the code
-    | :code:`./default /setups/default/setup.par`
+    | :code:`./default setups/default/setup.par`
 #. To clear and start afresh
     :code:`make clean SETUP_FILE=default`
 
@@ -37,7 +37,7 @@ To (re)start the simulation from a specific snapshot, follow the steps.
     :code:`cp your/data/directory/foo.h5 setups/restartrun/`
 #. Rename the file to :code:`restart.h5`
     :code:`mv foo.h5 restart.h5`
-#. Set the :code:`restart` condition in the :code:`setup.par` file to :code:`.true.`
+#. Uncomment the `CFLAGS+=-D RESTART``flag by removing the `#` in front of it.
 
 Unit tests
 ++++++++++

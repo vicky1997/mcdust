@@ -87,7 +87,7 @@ class Swarm:
         self.grain_size = np.multiply(mass_to_one_third,con)
         self.snapt = snapshottime
         print("Done!")
-    def calculate_properties(self,pars,time=-1):
+    def sigmadevol(self,pars,time=-1):
         """Function to calculate dust surface density
 
         Args:
@@ -95,17 +95,17 @@ class Swarm:
             time (int, optional): time of the simumation. Defaults to -1.
         """        
         rbins = 100
-        rwalls = np.linspace(0.99*pars.minr,pars.maxr+0.1, rbins)*au
+        rwalls = np.linspace(pars.minr,pars.maxr, rbins+1)*au
         rcents = 0.5*(rwalls[1:]+rwalls[:-1])
         drdis = rwalls[1:]-rwalls[:-1]
         if(time==-1):
             time = self.snapt[-1]
         it = self.snapt.searchsorted(time)
         rdis = self.rdis[it,:]
-        rcounts,binsr = np.histogram(rdis,bins=rwalls)
-        self.sigmad = rcounts[:-1] *self.mswarm / (2 * np.pi * rcents*drdis)
-        self.rwalls = rwalls
-        self.rcents = rcents
+        rcounts,binsr = np.histogram(rdis,bins=rwalls/au)
+        self.sigmad = rcounts[:] *self.mswarm / (2 * np.pi * rcents*drdis)
+        self.rwalls = rwalls/au
+        self.rcents = rcents/au
     def describe(self,time=-1):
         """Function that prints the mean, median, max and min values for the
            properties of the swarms.

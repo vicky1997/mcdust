@@ -1,11 +1,11 @@
 number_of_particles_per_cell              256
-number_of_radial_zones                    32
-number_of_vertical_zones                  16
+number_of_radial_zones                    1
+number_of_vertical_zones                  128
 steps_between_outputs                     10000
 time_between_outputs_[yrs]                250.
 maximum_time_of_simulation_[yrs]          10000.
-minimum_radius_[AU]                       1.
-maximum_radius_[AU]                       100.00
+minimum_radius_[AU]                       0.995
+maximum_radius_[AU]                       1.005
 monomer_radius_[cm]                       1.e-4
 material_density_[g/cm3]                  1.2
 dmmax                                     0.001

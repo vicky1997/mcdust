@@ -16,6 +16,7 @@
     setup
     inputoutput
     codesetup
+    standardmodel
     dustdynamics
     dustcoagulation
     notebooks/mcdust_example.ipynb
