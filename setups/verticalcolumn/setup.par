@@ -1,9 +1,9 @@
 number_of_particles_per_cell              256
 number_of_radial_zones                    1
 number_of_vertical_zones                  128
-steps_between_outputs                     10000
-time_between_outputs_[yrs]                250.
-maximum_time_of_simulation_[yrs]          10000.
+steps_between_outputs                     100
+time_between_outputs_[yrs]                100.
+maximum_time_of_simulation_[yrs]          1000.
 minimum_radius_[AU]                       0.995
 maximum_radius_[AU]                       1.005
 monomer_radius_[cm]                       1.e-4
@@ -11,9 +11,9 @@ material_density_[g/cm3]                  1.2
 dmmax                                     0.001
 evaporation_radius_[AU]                   0.99
 dust_to_gas_ratio                         0.01
-fragmentation_velocity_[cm/s]             1000.
+fragmentation_velocity_[cm/s]             100.
 alpha                                     1.e-3
 sigma_gas_[g/cm2]                         1000.
 temperature_[K]                           280.
 erosion_mass_ratio                        10
-data_directory                            "data"
+data_directory                            "vertical_1D"

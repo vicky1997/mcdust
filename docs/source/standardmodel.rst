@@ -26,7 +26,7 @@ We use a vertically isothermal disk temperature model where the sound speed give
 
 .. math::
 
-    cs(r) = cs_0\left(\frac{r}{AU}\right)^{-0.25}
+    c_s(r) = c_{s0}\left(\frac{r}{AU}\right)^{-0.25}
 
 where :math:`cs_0 = \sqrt{k_BT_0/m_{H_2}}` is the sound speed at 1 AU. This is defined in the function :code:`cs(x)`.
 
@@ -38,7 +38,7 @@ The gas pressure is then given by,
 
 This is defined in the function :code:`Pg(x,z,time)`
 
-The turbulent strength :math:`alpha` is defined in the function :code:`alpha(x)` and is constant over time and space in the default model. The gas velocity is set to zero in the default model and can be changed in the function :code:`vgas(x,time)`. 
+The turbulent strength :math:`\alpha` is defined in the function :code:`alpha(x)` and is constant over time and space in the default model. The gas velocity is set to zero in the default model and can be changed in the function :code:`vgas(x,time)`. 
 
 Default run
 +++++++++++

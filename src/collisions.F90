@@ -172,7 +172,7 @@ module collisions
    ! calculation of relative velocities of bodies:
    ! we take 5 sources:
    ! Brownian motion vB
-   ! turbulence vT (Ormel & Cuzzi 2007), implementation stolen from Til Birnstiel
+   ! turbulence vT (Ormel & Cuzzi 2007), implementation taken from Til Birnstiel (Birnstel et al 2010)
    ! radial drift vr
    ! vertical settling vs
    ! azimuthal drift vtan
@@ -353,6 +353,12 @@ module collisions
 
    ! performing the collision: deciding the collision outcome - put your collision model here
    ! only the representative particle is updated
+   ! the default model has hit-and-stick, fragmentation and erosion. 
+   ! the outcomes are based on the relative velocities computed in relvels
+   ! to add your collision outcomes create a subroutine for the collisional outcome
+   ! and call the subroutine below at the appropriate condition w.r.t relvels
+   ! or adapt the conditions to suit your collision model
+   ! hit-and-stick, fragmentation, erosion can be adapted in their respective subroutines.
    subroutine collision(nri,nrk,swarms,relvels, accelncol)
       implicit none
       integer, intent(in)                             :: nri, nrk

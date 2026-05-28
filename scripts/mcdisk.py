@@ -209,16 +209,16 @@ class Diskbuild():
             self.tmix = 1./(1e-3 * self.omegaK[:])
             self.rhog_mid  = self.sigmag/np.sqrt(2*np.pi)/self.Hg
     def vel_vn(self,p,q,sigmag0,t0):
-        """_summary_
+        """Function to compute the maximal radial drift velocity
 
         Args:
-            p (_type_): _description_
-            q (_type_): _description_
-            sigmag0 (_type_): _description_
-            t0 (_type_): _description_
+            p (real): gas surface density power law exponent at 1 AU.
+            q (real): temperature power law exponent.
+            sigmag0 (real): gas surface density at 1 AU in g/cm2.
+            t0 (real): temperature at 1 AU in Kelvin
 
         Returns:
-            _type_: _description_
+            vn(real): maximal radial drift velocity
         """        
         vn = np.zeros_like(self.Pgas)
         for i in range(np.size(self.rcents)):

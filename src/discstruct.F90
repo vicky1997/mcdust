@@ -1,5 +1,28 @@
 ! put your gas disk model here
+! ----------------------------------------------------------------------------------------------
 ! x is distance from the star (in cm)
+! time is the simulation time (in seconds)
+! ----------------------------------------------------------------------------------------------
+! to change the disk model update/adapt the following functions (not exhaustive list)
+! alpha (x) - to update the turbulence prescription in the model
+! cs(x) - to update the sound speed/temperature profile of the disk
+! sigmag(x,time) - to update the radial gas surface density profile of the disk
+! densg(x,z,time) - to update the 2-D gas density distribution in the disk
+! omegaK(x) - to update the angular frequency prescription (incase of different mass stars, etc.)
+! vgas(x,time) - to update the gas radial velocity in the disk
+! Pg(x,z,time) - to update the gas pressure in disk
+! -----------------------------------------------------------------------------------------------
+! example: alpha turbulence in the default model is constant throughout the disk
+! to modify to a time dependent radial profile 
+! real function alpha(x,time)
+!     implicit none
+!     real, intent(in) :: x, time
+!     alpha = f(x,time) ! where f(x,time) is your function/prescription for alpha at every (x,time)
+!    return
+! Remember to update the calls of alpha in the other routines/modules to alpha(x,time)
+! to suit the new function arguments
+! -----------------------------------------------------------------------------------------------
+
 module discstruct
     use constants, only: AU, kB, mH2, Msun, year
     use parameters, only: alpha_t, sigmag0, temperature
