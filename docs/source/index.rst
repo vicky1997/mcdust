@@ -20,7 +20,7 @@
     dustdynamics
     dustcoagulation
     notebooks/mcdust_example.ipynb
-    verticalcol.ipynb
+    notebooks/verticalcol.ipynb
     example_1
     citation
     
