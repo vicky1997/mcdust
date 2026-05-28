@@ -21,5 +21,6 @@
     dustcoagulation
     notebooks/mcdust_example.ipynb
     example_1
+    verticalcol.ipynb
     citation
     
