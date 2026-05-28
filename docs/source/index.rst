@@ -19,7 +19,7 @@
     standardmodel
     dustdynamics
     dustcoagulation
-    notebooks/mcdust_example
+    notebooks/verticalcol.ipynb
     example_1
     example_2
     citation
