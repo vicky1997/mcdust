@@ -3,6 +3,11 @@
 `git clone git@github.com:vicky1997/mcdust.git`
 
 ## Prerequisites
+ - A Linux/Unix based OS
+ - A Fortran compiler (preferably `gfortran` with `OpenMP`)
+ - A Fortran-OpenMP installation
+ - A HDF5 serial installation ()
+ - A Python installation (if you want to use the pre-written post-processing scripts)
 
 `gfortran` `hdf5-serial` `python` `OpenMP`
 
