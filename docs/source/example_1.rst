@@ -1,4 +1,4 @@
-Example 2: Tracking histories
+Example: Tracking histories
 ====================
 
 Coming Soon..
