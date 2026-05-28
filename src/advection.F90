@@ -5,7 +5,7 @@
 module advection
 
    use constants,  only: pi, AU, third, AH2, mH2, year
-   use discstruct, only: Pg, densg, omegaK, cs, diffcoefgas, vgas, ddensgdr, ddensgdz, alpha
+   use discstruct, only: Pg, densg, omegaK, cs, diffcoefgas, vgas_r, vgas_z, ddensgdr, ddensgdz, alpha
    use types,      only: swarm
    use parameters, only: matdens, smallr, con2
 
@@ -131,7 +131,6 @@ module advection
 
       return
    end subroutine vel_rad
-#endif
     ! vertical redistribution of particles to a theoretical Gaussian profile
    subroutine vertical_redistr(particle, realtime)
       implicit none
@@ -151,7 +150,7 @@ module advection
 
       return
    end subroutine vertical_redistr
-
+#endif
    ! calculates the Stokes numbers of particles locally
    real function stokesnr(particle, realtime)
       implicit none
@@ -187,7 +186,8 @@ module advection
       type(swarm)                                     :: particle
       real                                            :: vs
 
-      vs =particle%zdis * omegaK(particle%rdis) * particle%stnr / (1. + particle%stnr**2.)
+      vs = vgas_z(particle%rdis, particle%zdis, realtime)/(1. + particle%stnr* particle%stnr) + &
+            particle%zdis * omegaK(particle%rdis) * particle%stnr / (1. + particle%stnr**2.)
       particle%velz = vs
       return
    end subroutine vel_vs
@@ -199,10 +199,11 @@ module advection
       implicit none
       type(swarm)                                     :: particle
       real, intent(in)                                :: realtime
-      real                                            :: vr
+      real                                            :: vr 
       real, intent(in)                                :: vn
 
-      vr = 2. * vn / (particle%stnr + 1./particle%stnr) + vgas(particle%rdis, realtime) / (1. + particle%stnr* particle%stnr)
+      vr = 2. * vn / (particle%stnr + 1./particle%stnr) + &
+            vgas_r(particle%rdis, particle%zdis, realtime) / (1. + particle%stnr* particle%stnr)
       particle%velr = vr
 
       return

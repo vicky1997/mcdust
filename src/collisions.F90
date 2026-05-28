@@ -4,7 +4,7 @@
 module collisions
 
    use constants,  only: pi, third, mH2, AH2, AU
-   use discstruct, only: cs, omegaK, densg, Pg, vgas, alpha
+   use discstruct, only: cs, omegaK, densg, Pg, vgas_r, vgas_z, alpha
    use grid,       only: g
    use initproblem,only: m0, mswarm
    use parameters, only: matdens, dmmax, con1, con2, vfrag 
@@ -19,7 +19,7 @@ module collisions
    public :: mc_collisions
 
 #ifdef TESTCOLLISIONS
-   public :: col_rates, rel_vels, col_rates_r, vel_vs_centr, vel_rd_centr, stokes_nr_centr
+   public :: col_rates, rel_vels, col_rates_r, vel_vs_centr, vel_rd_centr, col_accel, stokes_nr_centr
 #endif
 
    contains
@@ -87,7 +87,9 @@ module collisions
       do i = 1, nsws
          call stokes_nr_centr(i, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
          call vel_vs_centr(nr, ni, i, stokesnr, Kepler_freq, vs)
-         call vel_rd_centr(nr, i, stokesnr, vr, vn, realtime)
+#ifdef RADRIFT
+         call vel_rd_centr(nr, ni, i, stokesnr, vr, vn, realtime)
+#endif
       enddo
 
       ! calculates relative velocities and collision rates matrix
@@ -118,7 +120,9 @@ module collisions
          call collision(nri,nrk,swarms,relvels, accelncol)
          call stokes_nr_centr(nri, swarms, stokesnr, lmfp, gasdens, Kepler_freq, cs_speed)
          call vel_vs_centr(nr, ni, nri, stokesnr, Kepler_freq, vs)
-         call vel_rd_centr(nr, nri, stokesnr, vr, vn, realtime)
+#ifdef RADRIFT
+         call vel_rd_centr(nr, ni, nri, stokesnr, vr, vn, realtime)
+#endif
          call rel_vels(nri, swarms, stokesnr, vr, vs, relvels, vn, Reynolds, veta, Vg2, tL, teta, Kepler_freq,cs_speed)
          relvels(:,nri) = relvels(nri,:)
          colri(:) = colri(:) - colrates(:,nri)
@@ -172,7 +176,7 @@ module collisions
    ! calculation of relative velocities of bodies:
    ! we take 5 sources:
    ! Brownian motion vB
-   ! turbulence vT (Ormel & Cuzzi 2007), implementation taken from Til Birnstiel (Birnstel et al 2010)
+   ! turbulence vT (Ormel & Cuzzi 2007), implementation stolen from Til Birnstiel (Birnstel et al 2010)
    ! radial drift vr
    ! vertical settling vs
    ! azimuthal drift vtan
@@ -250,8 +254,11 @@ module collisions
       vtan(:) = vn * ( 1. /(1.+stokesnr(:)**2.) - 1. / (1.+stokesnr(nl)**2.) )
 
       ! total
+#ifdef RADRIFT
          relvels(nl,:) = sqrt(vB2(:)  + vT2(:) + (vs(:) - vs(nl))**2 + (vr(:) - vr(nl))**2 + vtan(:)**2)
-         !relvels(nl,:) = sqrt(vB2(:) + (vs(:) - vs(nl))**2 + (vr(:) - vr(nl))**2 + vtan(:)**2)
+#else
+         relvels(nl,:) = sqrt(vB2(:) + (vs(:) - vs(nl))**2 + (vr(:) - vr(nl))**2 + vtan(:)**2)
+#endif
 
       return
    end subroutine rel_vels
@@ -453,15 +460,17 @@ module collisions
       real, dimension(:), allocatable                 :: vs
       integer, intent(in)                             :: i       ! index of particle
       real, intent (in)                               :: Kepler_freq
-      vs(i) = g%zce(nr,ni) * Kepler_freq * min(stokesnr(i), 0.5)
+      vs(i) = vgas_z(g%rce(nr), g%zce(nr,ni), realtime)/(1. + stokesnr(i) * stokesnr(i)) + &
+               g%zce(nr,ni) * Kepler_freq * min(stokesnr(i), 0.5)
 
       return
    end subroutine vel_vs_centr
 
+#ifdef RADRIFT
    ! velocity of radial drift
-   subroutine vel_rd_centr(nr, i, stokesnr, vr, vn, realtime)
+   subroutine vel_rd_centr(nr, ni, i, stokesnr, vr, vn, realtime)
       implicit none
-      integer, intent(in)                             :: nr
+      integer, intent(in)                             :: nr, ni
       real, dimension(:), allocatable                 :: stokesnr
       real, dimension(:), allocatable                 :: vr
       real, intent(in)                                :: vn
@@ -469,9 +478,10 @@ module collisions
       real, intent(in)                                :: realtime
 
       vr(i) = 2. * vn * stokesnr(i) / (stokesnr(i)**2. + 1.) + &
-              vgas(g%rce(nr), realtime) / (1. + stokesnr(i) * stokesnr(i))
+              vgas_r(g%rce(nr), g%zce(nr,ni), realtime) / (1. + stokesnr(i) * stokesnr(i))
 
       return
    end subroutine vel_rd_centr
+#endif
 
 end

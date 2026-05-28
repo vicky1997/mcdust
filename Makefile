@@ -1,16 +1,18 @@
 F90=gfortran
 H5F=h5fc
-# uncomment this if you want to debug
-#FFLAGS=-ffpe-trap=zero,overflow,invalid -fopenmp -Wall -W -ffree-form -g -fbounds-check -fbacktrace -fdefault-real-8 -fcheck=all -O0
+#FFLAGS=-ffpe-trap=zero,overflow,invalid -fopenmp -Wall -W -ffree-form -g -fbounds-check -fbacktrace -fdefault-real-8 -fcheck=all -O2
 FFLAGS=-O2 -fdefault-real-8 -ffree-form -fopenmp
 
 #add preprocessors:
 CFLAGS=
+# setup:
 ifndef SETUP_FILE
 	$(error Specify SETUP_FILE. Example: make SETUP_FILE=default)
-endif
+ endif
+# setuptest:
+# 	SETUP_FILE=tests
 
-OPT_FILE ?= setups/$(SETUP_FILE)/preprocs.opt
+OPT_FILE ?= setups/$(SETUP_FILE)/prepocs.opt
 -include $(OPT_FILE)
 
 SRC_DIR=src
@@ -28,16 +30,19 @@ test: $(TEST)
 $(OBJ_DIR)/%.o: %.F90 | $(OBJ_DIR)
 	$(H5F) $(FFLAGS) $(CFLAGS) -J$(OBJ_DIR) -c $< -o $@
 
-$(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
+$(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/gasvelocities.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
 	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
 
-$(TEST): $(OBJ_DIR)/testsuite.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
+
+$(TEST): $(OBJ_DIR)/testsuite.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/gasvelocities.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
 	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
 
 
 $(OBJ_DIR)/constants.o: $(SRC_DIR)/constants.F90
 $(OBJ_DIR)/types.o: $(SRC_DIR)/types.F90
+$(OBJ_DIR)/utils.o: $(SRC_DIR)/utils.F90
 $(OBJ_DIR)/parameters.o: $(SRC_DIR)/parameters.F90 $(OBJ_DIR)/constants.o
+$(OBJ_DIR)/gasvelocities.o: $(SRC_DIR)/gasvelocities.F90 $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/utils.o 
 $(OBJ_DIR)/discstruct.o: $(SRC_DIR)/discstruct.F90 $(OBJ_DIR)/parameters.o $(OBJ_DIR)/constants.o
 $(OBJ_DIR)/advection.o: $(SRC_DIR)/advection.F90 $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/types.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/constants.o
 $(OBJ_DIR)/initproblem.o: $(SRC_DIR)/initproblem.F90 $(OBJ_DIR)/advection.o $(OBJ_DIR)/constants.o $(OBJ_DIR)/types.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o

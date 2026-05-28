@@ -120,13 +120,49 @@ module discstruct
     end function
 
     ! radial gas velocity
-    real function vgas(x, time)
-        !use constants, only: pi
+    real function vgas_r(x, z, time)
+        use constants, only: AU
+#ifdef READGASVELOCITES_R
+        use gasvelocities
+#endif
         implicit none
-        real, intent(in)  :: x, time
+        real, intent(in)  :: x, z, time
+        !logical, intent(in) :: vgaswind
+        real :: zh, vgasalpha
 
-        vgas = 0.0
+#ifdef READGASVELOCITES_R          
+                zh = z/(cs(x)/omegaK(x))
+                vgasalpha = -3. * diffcoefgas(x) / 2. / x / cs(x)
+                vgas = interp2d(r_data_vgr)/AU,zh_data_vgr,vgr_data,x/AU,zh,.false.,vgasalpha)*cs(x)
+#elif CONSTGASVEL_R  
+                vgas = -3. * diffcoefgas(x) / 2. / x
+#else
+                vgas = 0.
+#endif 
+        return
+    end function
 
+    real function vgas_z(x, z, time)
+        use constants, only: AU
+#ifdef READGASVELOCITES_Z
+        use gasvelocities
+#endif
+        implicit none
+        real, intent(in)  :: x, z, time
+        !logical, intent(in) :: vgaswind
+        real :: zh, vgasalpha
+
+#ifdef READGASVELOCITES_Z          
+                zh = z/(cs(x)/omegaK(x))
+                !vgasalpha = -3. * diffcoefgas(x) / 2. / x / cs(x)
+                vgasalpha= 0.
+                vgas = interp2d(r_data_vgz/AU,zh_data_vgz,vgz_data,x/AU,zh,.false.,vgasalpha)*cs(x)
+#elif CONSTGASVEL_Z  
+                !vgas = -3. * diffcoefgas(x) / 2. / x
+                vgas = 0.
+#else
+                vgas = 0.
+#endif 
         return
     end function
 
