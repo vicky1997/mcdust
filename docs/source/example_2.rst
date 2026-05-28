@@ -1,4 +1,4 @@
-Example 3: Adding dust growth outcomes
+Example : Adding dust growth outcomes
 ===========================
 
 Coming Soon..
