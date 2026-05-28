@@ -19,7 +19,6 @@
     standardmodel
     dustdynamics
     dustcoagulation
-    mcdust_example.ipynb
     verticalcol.ipynb
     example_1
     citation
