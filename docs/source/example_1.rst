@@ -5,6 +5,7 @@ Example: Post-processing data from hydro simulations
 The post-processing version of mcdust is in the github branch :code:`postprocess` and to access it
 
 .. code-block:: bash
+    
     git checkout postprocess
 
 Preparing the data to post-process
@@ -17,6 +18,7 @@ To be able to post-process velocity data the following steps are required
 - save the data in the following format separately for radial and vertical velocities (or depending on which one you want to implement)
 
 .. code-block:: bash
+
     rsize = np.size(r)
     zsize = np.size(z)
     rzsize = [rsize, zsize]
@@ -32,4 +34,4 @@ To be able to post-process velocity data the following steps are required
     with open(filename,"ab") as f:
         np.savetxt(f,np.c_[rr.flatten(),vr]) 
 
-and update the file name in the setup.par and turn on the respective flag in the preprocs.opt file. It is :code:`#READGASVELOCITIES_R` for reading radial velocities and :code:`#READGASVELOCITIES_Z` for vertical velocities.
+and update the file name in the setup.par and turn on the respective flag in the preprocs.opt file. It is :code:`#READGASVELOCITIES_R` for reading radial velocities and :code:`#READGASVELOCITIES_Z` for vertical velocities. An example of the setup can be found in :code:`/setups/gasvel/`
