@@ -19,11 +19,13 @@ TEST_DIR=unit_tests
 
 EXECUTABLE = $(SETUP_FILE)
 TEST=test1
+KERNELTEST=test2
 vpath %.F90 $(SRC_DIR) $(TEST_DIR)
 
 
 all: $(EXECUTABLE)
 test: $(TEST)
+kerneltest: $(KERNELTEST)
 
 $(OBJ_DIR)/%.o: %.F90 | $(OBJ_DIR)
 	$(H5F) $(FFLAGS) $(CFLAGS) -J$(OBJ_DIR) -c $< -o $@
@@ -32,6 +34,9 @@ $(EXECUTABLE): $(OBJ_DIR)/main.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $
 	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
 
 $(TEST): $(OBJ_DIR)/testsuite.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
+	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
+
+$(KERNELTEST): $(OBJ_DIR)/kerneltest.o $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o 
 	$(H5F) $(FFLAGS) $(CFLAGS) $(LDFLAGS) $? -o $@
 
 
@@ -49,6 +54,7 @@ $(OBJ_DIR)/timestep.o: $(SRC_DIR)/timestep.F90 $(OBJ_DIR)/advection.o $(OBJ_DIR)
 $(OBJ_DIR)/hdf5output.o: $(SRC_DIR)/hdf5output.F90 $(OBJ_DIR)/grid.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.F90 $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
 $(OBJ_DIR)/testsuite.o: $(TEST_DIR)/testsuite.F90 $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
+$(OBJ_DIR)/kerneltest.o: $(TEST_DIR)/kerneltest.F90 $(OBJ_DIR)/timestep.o $(OBJ_DIR)/hdf5output.o $(OBJ_DIR)/collisions.o $(OBJ_DIR)/advection.o $(OBJ_DIR)/grid.o $(OBJ_DIR)/parallel_sort.o $(OBJ_DIR)/mrgrnk.o $(OBJ_DIR)/initproblem.o $(OBJ_DIR)/discstruct.o $(OBJ_DIR)/parameters.o $(OBJ_DIR)/types.o $(OBJ_DIR)/constants.o
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)

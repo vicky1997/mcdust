@@ -17,7 +17,6 @@ module collisions
 
    private
    public :: mc_collisions
-
 #ifdef TESTCOLLISIONS
    public :: col_rates, rel_vels, col_rates_r, vel_vs_centr, vel_rd_centr, stokes_nr_centr
 #endif
@@ -255,7 +254,7 @@ module collisions
 
       return
    end subroutine rel_vels
-
+ 
    ! calculation of the collision rates between representative particle nl and all physical particles
    subroutine col_rates(nl, swarms, relvels, colrates, accelncol, vol, deltar, deltaz)
       implicit none

@@ -186,6 +186,8 @@ module hdf5output
                                                                                   H5T_NATIVE_INTEGER, this%error)
     call h5tinsert_f(this%memtype, "mass of a particle [g]", H5OFFSETOF(C_LOC(swrm(1)),C_LOC(swrm(1)%mass)), &
                                                                                   H5T_NATIVE_DOUBLE, this%error)
+    call h5tinsert_f(this%memtype, "number of particles in swarm", H5OFFSETOF(C_LOC(swrm(1)),C_LOC(swrm(1)%npar)), &
+                                                                                  H5T_NATIVE_DOUBLE, this%error)
     call h5tinsert_f(this%memtype, "cylindrical radius [AU]", H5OFFSETOF(C_LOC(swrm(1)),C_LOC(swrm(1)%rdis)), &
                                                                                   H5T_NATIVE_DOUBLE, this%error)
     call h5tinsert_f(this%memtype, "height above midplane [AU]", H5OFFSETOF(C_LOC(swrm(1)),C_LOC(swrm(1)%zdis)), &
