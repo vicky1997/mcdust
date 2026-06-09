@@ -22,5 +22,6 @@
     notebooks/mcdust_example
     notebooks/kernel_tests
     example_1
+    notebooks/verticalcolumn
     citation
     
