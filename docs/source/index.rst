@@ -19,6 +19,7 @@
     standardmodel
     dustdynamics
     dustcoagulation
+    notebooks/mcdust_example
     example_1
     citation
     
