@@ -22,6 +22,6 @@
     notebooks/mcdust_example
     notebooks/kernel_tests
     example_1
-    notebooks/verticalcol.ipynb
+    notebooks/verticalcolumn
     citation
     
