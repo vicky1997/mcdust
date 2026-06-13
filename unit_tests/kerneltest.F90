@@ -13,7 +13,7 @@ program testkernel
 
     implicit none
     !  ------- set parameters here --------------------------------------------------------------------------------------
-   integer, parameter             :: ntot = 5e4     ! total number of representative particles (swarms)
+   integer, parameter             :: ntot = 200     ! total number of representative particles (swarms)
    real, parameter                :: dens = 1.       ! dust volume mass density
    real, parameter                :: mswrm = 10.e20  ! mass of the swarm
 #ifdef FRAGTEST
