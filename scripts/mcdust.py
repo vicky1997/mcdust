@@ -259,7 +259,7 @@ class Plots:
 
         Args:
             swarms (Swarms): Object to store swarm data
-            time (int, optional): Time of the simulation. Defaults to -1.
+            time (int, optional): Time of the simulation in year. Defaults to -1 which points to the last snapshot of the simulation.
             scatter (real, optional): Quantity to be denoted with the color. Defaults to np.zeros(100).
             step (int, optional): Plot every nth element. Defaults to 1.
             cmap (str, optional): Colomarp. Defaults to 'viridis'.
