@@ -13,7 +13,7 @@ If you encounter something odd/wrong while using `mcdust`, we appreciate if you 
 Is it a feature? - feature reports
 ++++++++++++++++++++++++++++++++++
 
-If you think `mcdust` can be extended with a feature or there is something missing in `mcdust`, we encourage you to open a `feature report issue< https://github.com/vicky1997/mcdust/issues/new?template=bug_report.md>`_.
+If you think `mcdust` can be extended with a feature or there is something missing in `mcdust`, we encourage you to open a `feature report issue <https://github.com/vicky1997/mcdust/issues/new?template=bug_report.md>`_.
 
 
 
