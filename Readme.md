@@ -1,3 +1,15 @@
+Markdown:
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.10140/status.svg)](https://doi.org/10.21105/joss.10140)
+
+HTML:
+<a style="border-width:0" href="https://doi.org/10.21105/joss.10140">
+  <img src="https://joss.theoj.org/papers/10.21105/joss.10140/status.svg" alt="DOI badge" >
+</a>
+
+reStructuredText:
+.. image:: https://joss.theoj.org/papers/10.21105/joss.10140/status.svg
+   :target: https://doi.org/10.21105/joss.10140
+   
 ## Installation
 
 `git clone git@github.com:vicky1997/mcdust.git`

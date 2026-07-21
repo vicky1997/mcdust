@@ -1,0 +1,40 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Vaikundaraman
+  given-names: Vignesh
+  orcid: "https://orcid.org/0000-0002-2451-9574"
+- family-names: Gurrutxaga
+  given-names: Nerea
+  orcid: "https://orcid.org/0009-0008-3256-9564"
+- family-names: Drążkowska
+  given-names: Joanna
+  orcid: "https://orcid.org/0000-0002-9128-0305"
+doi: 10.5281/zenodo.21131738
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Vaikundaraman
+    given-names: Vignesh
+    orcid: "https://orcid.org/0000-0002-2451-9574"
+  - family-names: Gurrutxaga
+    given-names: Nerea
+    orcid: "https://orcid.org/0009-0008-3256-9564"
+  - family-names: Drążkowska
+    given-names: Joanna
+    orcid: "https://orcid.org/0000-0002-9128-0305"
+  date-published: 2026-07-14
+  doi: 10.21105/joss.10140
+  issn: 2475-9066
+  issue: 123
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 10140
+  title: "mcdust: A 2D Monte Carlo code for dust coagulation in
+    protoplanetary disks"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.10140"
+  volume: 11
+title: "mcdust: A 2D Monte Carlo code for dust coagulation in
+  protoplanetary disks"
